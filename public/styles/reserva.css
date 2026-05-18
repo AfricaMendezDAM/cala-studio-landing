@@ -27,6 +27,11 @@
   color: var(--ink-soft);
 }
 .reserve .copy .note strong{ color: var(--ink); font-weight:600; }
+.reserve .copy .copy-img{
+  margin-top: 20px;
+  width: 100%; border-radius: 4px;
+  object-fit: contain;
+}
 
 form.book{ display:grid; gap: 14px; }
 .row-2{ display:grid; grid-template-columns: 1fr 1fr;   gap: 12px; }

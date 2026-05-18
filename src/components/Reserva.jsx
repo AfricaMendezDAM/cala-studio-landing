@@ -15,6 +15,7 @@ function Copy() {
         <strong>Política suave.</strong> Las clases no usadas se recuperan
         en el mismo mes.
       </div>
+      <img src="assets/ending.png" alt="" className="copy-img" />
     </div>
   );
 }
