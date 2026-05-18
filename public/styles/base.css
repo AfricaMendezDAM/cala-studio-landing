@@ -1,0 +1,37 @@
+:root{
+  /* Blancos rotos fríos con profundidad — sin amarillos */
+  --bg:        #F1F1EE;   /* blanco roto base */
+  --bg-2:      #E7E7E3;   /* blanco roto + profundo */
+  --paper:     #F7F7F5;   /* superficies altas */
+  --line:      rgba(31,30,28,.12);
+  --line-soft: rgba(31,30,28,.07);
+
+  /* Carbón */
+  --ink:       #1F1E1C;
+  --ink-soft:  #5A5854;
+  --ink-mute:  #8E8B86;
+
+  /* Acentos */
+  --blue:      #2F6B96;   /* azul mediterráneo */
+  --blue-deep: #224F70;
+  --yellow:    #D9B65A;
+
+  --shadow-lg: 0 30px 60px -30px rgba(0,0,0,.32);
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html, body{ background:var(--bg); color:var(--ink); }
+body{
+  font-family:"Montserrat", system-ui, sans-serif;
+  font-weight:400;
+  line-height:1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x:hidden;
+}
+img{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+input, textarea, select{ font:inherit; color:inherit; }
+
+::selection{ background: var(--blue); color: #FFF; }
