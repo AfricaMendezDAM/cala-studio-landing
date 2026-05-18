@@ -52,15 +52,15 @@ export default function Hero() {
 
       <div className="hero-inner">
         <div className="hero-top">
-          <span><span className="y"></span>Verano · MMXXVI</span>
-          <span>Costa de Galicia</span>
+          <span><span className="y"></span></span>
+          <span></span>
         </div>
 
         <div className="hero-center">
-          <h1>Pilates<br/>con <em>vistas</em>.</h1>
+          <h1>Pilates<br/>con <em>vistas</em></h1>
           <p className="lede">
-            Un estudio pequeño en la costa. Grupos reducidos, luz natural y
-            sin prisa. Mat, sculpt y sesiones de amanecer frente al mar.
+            Grupos reducidos, luz natural y sin prisa.
+            Mat, sculpt y sesiones de amanecer frente al mar.
           </p>
           <div className="actions">
             <a href="#reserva" className="btn btn-primary">

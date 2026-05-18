@@ -29,7 +29,7 @@ function MapCard() {
       <iframe title="Ubicación de Cala Studio" src={mapSrc} loading="lazy"></iframe>
       <div className="overlay">
         <div className="addr">
-          <div className="k">Cómo llegar</div>
+          <div className="k"></div>
           <div className="v">
             <strong>{address.street}</strong><br/>
             {address.city}
@@ -51,10 +51,9 @@ export default function EventosUbicacion() {
     <Section
       id="eventos"
       num="III · Agenda & Ubicación"
-      title={<>Eventos. <em>Cómo llegar</em>.</>}
+      title={<>Eventos <em></em></>}
       right={<>
-        La agenda de verano se publica al inicio de cada mes. El estudio está
-        a pie de costa, con aparcamiento gratuito.
+      
       </>}
     >
       <div className="row-info">

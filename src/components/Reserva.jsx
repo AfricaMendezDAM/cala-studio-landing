@@ -6,10 +6,10 @@ import { SLOTS } from "../data.js";
 function Copy() {
   return (
     <div className="copy">
-      <h3>Cuéntanos qué <em>te interesa</em>.</h3>
+      <h3>Cuéntanos qué <em>te interesa</em></h3>
       <p>
         Si es tu primera vez, te llamamos para acompañarte en la elección del
-        grupo. Cancela hasta 6h antes sin penalización.
+        grupo. Cancela hasta 12h antes.
       </p>
       <div className="note">
         <strong>Política suave.</strong> Las clases no usadas se recuperan
@@ -22,7 +22,7 @@ function Copy() {
 function SlotChecks({ value, onToggle }) {
   return (
     <div className="field">
-      <label>Franjas que te encajan</label>
+      <label>Franjas</label>
       <div className="checks">
         {SLOTS.map(s => (
           <label key={s} className={"check" + (value.includes(s) ? " on" : "")}>
@@ -66,9 +66,9 @@ function BookingForm({ form, errors, upd, togglePref, onSubmit }) {
         </Field>
         <Field label="Tarifa">
           <select value={form.tarifa} onChange={e => upd("tarifa", e.target.value)}>
-            <option value="unica">Única — €18</option>
-            <option value="mensual-1">Mensual 1 — €58</option>
-            <option value="mensual-2">Mensual 2 — €92</option>
+            <option value="unica">Única — €15</option>
+            <option value="mensual-1">Mensual 1 — €40</option>
+            <option value="mensual-2">Mensual 2 — €75</option>
           </select>
         </Field>
         <Field label="Experiencia">
@@ -99,7 +99,7 @@ function BookingForm({ form, errors, upd, togglePref, onSubmit }) {
         <button type="submit" className="btn btn-dark">
           Enviar reserva <span className="arrow"></span>
         </button>
-        <span className="hint">Se guarda en JSON · descarga automática</span>
+        <span className="hint"></span>
       </div>
     </form>
   );
@@ -112,11 +112,11 @@ export default function Reserva() {
     <Section
       id="reserva"
       num="IV · Reserva"
-      title={<>Una clase, un mes o <em>una pregunta</em>.</>}
-      right={<>
-        Confirmamos en menos de 24h. También puedes escribir a
-        <strong style={{ color: "var(--ink)" }}> hola@cala.studio</strong>.
-      </>}
+      title={<>Una clase, un mes o <em>una pregunta</em></>}
+      // right={<>
+      //   Confirmamos en menos de 24h. También puedes escribir a
+      //   <strong style={{ color: "var(--ink)" }}> hola@cala.studio</strong>.
+      // </>}
     >
       <div className="reserve">
         <Copy />

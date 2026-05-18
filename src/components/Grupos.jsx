@@ -28,9 +28,9 @@ export default function Grupos() {
     <Section
       id="grupos"
       num="I · Grupos"
-      title={<>Dos métodos. <em>Una sala</em>.</>}
+      title={<>Dos métodos <em></em></>}
       right={<>
-        Grupos cerrados con progresiones de seis semanas. Si vienes sin
+        Grupos cerrados con progresiones de seis semanas: si vienes sin
         experiencia, empieza por Mat. Si ya practicas, Sculpt es tu sitio.
       </>}
     >

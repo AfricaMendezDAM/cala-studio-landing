@@ -1,8 +1,8 @@
 :root{
-  /* Blancos rotos fríos con profundidad — sin amarillos */
-  --bg:        #F1F1EE;   /* blanco roto base */
-  --bg-2:      #E7E7E3;   /* blanco roto + profundo */
-  --paper:     #F7F7F5;   /* superficies altas */
+  /* Blancos y cremas cálidos */
+  --bg:        #FFFFFF;   /* blanco puro — fondo base */
+  --bg-2:      #F5F3EF;   /* casi blanco, toque cálido mínimo */
+  --paper:     #FDFCFA;   /* blanco roto muy sutil — cards */
   --line:      rgba(31,30,28,.12);
   --line-soft: rgba(31,30,28,.07);
 

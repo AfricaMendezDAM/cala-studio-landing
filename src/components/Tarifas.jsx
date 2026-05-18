@@ -25,7 +25,7 @@ export default function Tarifas() {
     <Section
       id="tarifas"
       num="II · Tarifas"
-      title={<>Sin permanencia, sin <em>letra pequeña</em>.</>}
+      title={<>Sin permanencia, sin <em>letra pequeña</em></>}
       right={<>
         Material y mat incluidos. Las mensuales se pueden congelar una vez
         al año. IVA incluido.
