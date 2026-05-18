@@ -36,7 +36,7 @@ function SlotChecks({ value, onToggle }) {
   );
 }
 
-function BookingForm({ form, errors, upd, togglePref, onSubmit }) {
+function BookingForm({ form, errors, upd, togglePref, onSubmit, sending }) {
   return (
     <form className="book" onSubmit={onSubmit} noValidate>
       <div className="row-2">
@@ -97,8 +97,8 @@ function BookingForm({ form, errors, upd, togglePref, onSubmit }) {
       {errors.consent && <span className="err">{errors.consent}</span>}
 
       <div className="submit-row">
-        <button type="submit" className="btn btn-dark">
-          Enviar reserva <span className="arrow"></span>
+        <button type="submit" className="btn btn-dark" disabled={sending}>
+          {sending ? "Enviando…" : <>Enviar reserva <span className="arrow"></span></>}
         </button>
         <span className="hint"></span>
       </div>
@@ -107,7 +107,7 @@ function BookingForm({ form, errors, upd, togglePref, onSubmit }) {
 }
 
 export default function Reserva() {
-  const { form, errors, toast, upd, togglePref, submit } = useBookingForm();
+  const { form, errors, toast, sending, upd, togglePref, submit } = useBookingForm();
 
   return (
     <Section
@@ -124,7 +124,7 @@ export default function Reserva() {
         <BookingForm
           form={form} errors={errors}
           upd={upd} togglePref={togglePref}
-          onSubmit={submit}
+          onSubmit={submit} sending={sending}
         />
       </div>
 

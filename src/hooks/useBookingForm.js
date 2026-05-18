@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 
+// Crea tu formulario en https://formspree.io y pega aquí el ID
+const FORMSPREE_ID = "TU_FORM_ID";
+
 const DRAFT_KEY   = "cala.bookingDraft";
 const HISTORY_KEY = "cala.bookings";
 
@@ -30,18 +33,6 @@ function appendHistory(submission) {
   try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history, null, 2)); } catch {}
 }
 
-function downloadJSON(submission) {
-  try {
-    const blob = new Blob([JSON.stringify(submission, null, 2)], { type: "application/json" });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href = url;
-    a.download = `${submission.id}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  } catch {}
-}
-
 function validate(form) {
   const e = {};
   if (!form.nombre.trim()) e.nombre = "Indica tu nombre";
@@ -55,6 +46,7 @@ export function useBookingForm() {
   const [form, setForm]     = useState(readDraft);
   const [errors, setErrors] = useState({});
   const [toast, setToast]   = useState("");
+  const [sending, setSending] = useState(false);
   const toastTimer = useRef(null);
 
   useEffect(() => {
@@ -71,10 +63,10 @@ export function useBookingForm() {
   const flash = (msg) => {
     setToast(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(""), 3800);
+    toastTimer.current = setTimeout(() => setToast(""), 4500);
   };
 
-  const submit = (ev) => {
+  const submit = async (ev) => {
     ev.preventDefault();
     const e = validate(form);
     setErrors(e);
@@ -85,13 +77,25 @@ export function useBookingForm() {
       createdAt: new Date().toISOString(),
       ...form,
     };
-    appendHistory(submission);
-    downloadJSON(submission);
 
-    localStorage.removeItem(DRAFT_KEY);
-    setForm(initialForm);
-    flash("Reserva enviada · te escribimos en 24h");
+    setSending(true);
+    try {
+      const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(submission),
+      });
+      if (!res.ok) throw new Error();
+      appendHistory(submission);
+      localStorage.removeItem(DRAFT_KEY);
+      setForm(initialForm);
+      flash("¡Mensaje enviado! Nos pondremos en contacto contigo lo antes posible.");
+    } catch {
+      flash("Algo ha fallado, inténtalo de nuevo o escríbenos directamente.");
+    } finally {
+      setSending(false);
+    }
   };
 
-  return { form, errors, toast, upd, togglePref, submit };
+  return { form, errors, toast, sending, upd, togglePref, submit };
 }
