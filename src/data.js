@@ -1,8 +1,8 @@
 export const HERO_SLIDES = [
-  { img: "assets/hero.jpg",        label: "Atardecer" },
-  { img: "assets/carousel-01.png", label: "Mat outdoor · Frente al mar" },
-  { img: "assets/hero.jpg",        label: "Sunrise sessions" },
-  { img: "assets/carousel-03.png", label: "Brunch club · Eventos" },
+  { img: "assets/carousel-01.png",        label: "Atardecer" },
+  { img: "assets/hero.png", label: "Mat outdoor · Frente al mar" },
+  { img: "assets/carousel-03.png",        label: "Sunrise sessions" },
+  { img: "assets/carousel-04.png", label: "Brunch club · Eventos" },
 ];
 
 export const GROUPS = [
