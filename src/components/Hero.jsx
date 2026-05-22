@@ -44,7 +44,7 @@ export default function Hero() {
     <header id="top" className="hero">
       <div className="hero-bg">
         {HERO_SLIDES.map((s, i) => (
-          <div key={i} className={"hero-slide" + (i === idx ? " is-active" : "")}>
+          <div key={i} className={"hero-slide" + (i === idx ? " is-active" : "") + (s.darkOverlay ? " dark" : "")}>
             <img src={s.img} alt={s.label} />
           </div>
         ))}

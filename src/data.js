@@ -2,7 +2,7 @@ export const HERO_SLIDES = [
   { img: "assets/carousel-01.png",        label: "Atardecer" },
   { img: "assets/hero.jpg", label: "Mat outdoor · Frente al mar" },
   { img: "assets/carousel-03.png",        label: "Sunrise sessions" },
-  { img: "assets/carousel-04.png", label: "Brunch club · Eventos" },
+  { img: "assets/carousel-04.png", label: "Brunch club · Eventos", darkOverlay: true },
 ];
 
 export const GROUPS = [

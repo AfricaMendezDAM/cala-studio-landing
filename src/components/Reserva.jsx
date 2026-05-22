@@ -143,7 +143,7 @@ export default function Reserva() {
     <Section
       id="reserva"
       num="IV · Reserva"
-      title={<>Una clase, un mes o <em>una pregunta</em></>}
+      title={<>Reserva o <em>pregunta</em></>}
       // right={<>
       //   Confirmamos en menos de 24h. También puedes escribir a
       //   <strong style={{ color: "var(--ink)" }}> hola@cala.studio</strong>.
