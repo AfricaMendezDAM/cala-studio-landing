@@ -36,6 +36,39 @@ function SlotChecks({ value, onToggle }) {
   );
 }
 
+function PolicyConsent({ checked, onChange, error }) {
+  return (
+    <div className="policy-wrap">
+      <details className="policy-details">
+        <summary>Política de cancelación, privacidad e imágenes</summary>
+        <div className="policy-body">
+          <div className="policy-section">
+            <strong>Cancelación por lluvia</strong>
+            <p>Si las condiciones meteorológicas impiden realizar la clase, se avisará con un mínimo de 2 horas de antelación. Podrás elegir entre reembolso completo o cambio a otra clase disponible.</p>
+          </div>
+          <div className="policy-section">
+            <strong>Cancelación o cambio de grupo</strong>
+            <p>Puedes cancelar una clase o cambiar de grupo con al menos 12 horas de antelación, siempre que haya plaza disponible. Las cancelaciones fuera de este plazo no darán derecho a reembolso ni cambio.</p>
+          </div>
+          <div className="policy-section">
+            <strong>Protección de datos</strong>
+            <p>Los datos facilitados se tratarán únicamente para gestionar tu reserva y ponernos en contacto contigo en relación con las actividades del estudio. No se ceden a terceros.</p>
+          </div>
+          <div className="policy-section">
+            <strong>Imágenes</strong>
+            <p>Durante las sesiones pueden tomarse fotografías o vídeos con fines promocionales del estudio. Si no deseas aparecer en ellos, comunícalo antes de la clase y lo respetaremos.</p>
+          </div>
+        </div>
+      </details>
+      <label className="consent">
+        <input type="checkbox" checked={checked} onChange={onChange} />
+        <span>He leído y acepto la política de cancelación, privacidad e imágenes.</span>
+      </label>
+      {error && <span className="err">{error}</span>}
+    </div>
+  );
+}
+
 function BookingForm({ form, errors, upd, togglePref, onSubmit, sending }) {
   return (
     <form className="book" onSubmit={onSubmit} noValidate>
@@ -87,14 +120,11 @@ function BookingForm({ form, errors, upd, togglePref, onSubmit, sending }) {
         <textarea value={form.mensaje} onChange={e => upd("mensaje", e.target.value)} placeholder="Algo que quieras que sepamos antes de tu primera clase." />
       </Field>
 
-      <label className="consent">
-        <input type="checkbox" checked={form.consent} onChange={e => upd("consent", e.target.checked)} />
-        <span>
-          Acepto que cala·studio almacene los datos de este formulario con el
-          único fin de gestionar la reserva.
-        </span>
-      </label>
-      {errors.consent && <span className="err">{errors.consent}</span>}
+      <PolicyConsent
+        checked={form.consent}
+        onChange={e => upd("consent", e.target.checked)}
+        error={errors.consent}
+      />
 
       <div className="submit-row">
         <button type="submit" className="btn btn-dark" disabled={sending}>

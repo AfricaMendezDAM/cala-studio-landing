@@ -11,9 +11,10 @@ export const GROUPS = [
     tag: "Todos los niveles",
     name: "Pilates",
     nameEm: "Mat",
-    descr: "Suelo. Control postural, respiración y movilidad. Grupos reducidos de máximo 8 personas.",
+    descr: "Suelo. Control postural, respiración y movilidad.",
     schedule: [
-      { day: "Martes", hours: "10:30 — 11:30h"},
+      { day: "Martes", hours: "9:00 — 9:50h"},
+      { day: "Jueves", hours: "9:00 — 9:50h"},
 
     ],
   },
@@ -22,9 +23,10 @@ export const GROUPS = [
     tag: "Todos los niveles",
     name: "Pilates",
     nameEm: "Sculpt",
-    descr: "Mat acelerado con peso ligero y bandas. Fuerza funcional sin perder fluidez.",
+    descr: "Mat intenso con instrumentos de resistencia. Fuerza funcional sin perder fluidez.",
     schedule: [
-      { day: "Sábados",  hours: "10:30 — 11:30h"}
+      { day: "Martes",  hours: "10:00 — 10:50h"},
+      { day: "Jueves",  hours: "10:00 — 10:50h"}
     ],
   },
 ];
@@ -52,7 +54,7 @@ export const PRICING = [
     items: [
       "4 clases al mes",
       "Plaza fija en horario elegido",
-      "Recuperación en otro horario",
+      "Prioridad en eventos del estudio",
     ],
     cta: "Empezar el mes",
     featured: true,
@@ -61,7 +63,7 @@ export const PRICING = [
     label: "Compromiso",
     name: "Mensual",
     nameEm: "2 / semana",
-    amount: 75,
+    amount: 70,
     per: "/ mes",
     items: [
       "8 clases al mes",
@@ -78,7 +80,7 @@ export const EVENT_TEASERS = [
   { when: "Septiembre · 2026", name: "COMMING SOON" },
 ];
 
-export const SLOTS = ["Martes 10:30", "Sábado 10:30", "Sunrise"];
+export const SLOTS = ["Pilates Mat", "Pilates Sculpt", "Clase única"];
 
 export const LOCATION = {
   mapSrc: "https://www.openstreetmap.org/export/embed.html?bbox=-8.9339%2C42.4525%2C-8.8939%2C42.4725&layer=mapnik&marker=42.462495%2C-8.913941",
