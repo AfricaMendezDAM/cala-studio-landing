@@ -59,7 +59,7 @@ export default function Hero() {
         <div className="hero-center">
           <h1>Pilates<br/>con <em>vistas</em></h1>
           <p className="lede">
-            Grupos reducidos, luz natural y sin prisa.
+            Grupos reducidos, luz natural y sin prisa.<br/>
             Mat, sculpt y sesiones de amanecer frente al mar.
           </p>
           <div className="actions">
