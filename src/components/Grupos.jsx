@@ -3,7 +3,7 @@ import { GROUPS } from "../data.js";
 
 function GroupCard({ group }) {
   return (
-    <article className="group-card">
+    <a href="#reserva" className="group-card">
       <div className="head">
         <span className="num">{group.num}</span>
         <span className="tag">{group.tag}</span>
@@ -19,7 +19,7 @@ function GroupCard({ group }) {
           </div>
         ))}
       </div>
-    </article>
+    </a>
   );
 }
 
