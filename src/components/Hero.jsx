@@ -51,11 +51,6 @@ export default function Hero() {
       </div>
 
       <div className="hero-inner">
-        <div className="hero-top">
-          <span><span className="y"></span></span>
-          <span></span>
-        </div>
-
         <div className="hero-center">
           <h1>Pilates<br/>con <em>vistas</em></h1>
           <p className="lede">
