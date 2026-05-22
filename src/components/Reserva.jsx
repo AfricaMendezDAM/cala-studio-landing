@@ -6,7 +6,7 @@ import { SLOTS } from "../data.js";
 function Copy() {
   return (
     <div className="copy">
-      <h3>Cuéntanos qué <em>te interesa</em></h3>
+      <h3>Cuéntanos</h3>
       <p>
         Si es tu primera vez, te llamamos para acompañarte en la elección del
         grupo. Cancela hasta 12h antes.
