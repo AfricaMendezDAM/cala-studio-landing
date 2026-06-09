@@ -60,6 +60,17 @@
 .events-card .teaser .name{
   font-size: 14px; font-weight: 400; letter-spacing: .04em;
 }
+.events-card .teaser-left{
+  display:flex; flex-direction:column; gap: 2px;
+}
+.events-card .teaser .place{
+  font-size: 10px; letter-spacing:.18em; text-transform:uppercase;
+  color: rgba(255,255,255,.45); font-weight:500;
+}
+.events-card .teaser-confirmed .name{
+  font-weight: 500;
+  color: #FFF;
+}
 
 .map-card{
   position:relative;

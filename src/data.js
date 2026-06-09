@@ -75,9 +75,15 @@ export const PRICING = [
 ];
 
 export const EVENT_TEASERS = [
-  { when: "Julio · 2026",      name: "COMMING SOON" },
-  { when: "Agosto · 2026",     name: "COMMING SOON" },
-  { when: "Septiembre · 2026", name: "COMMING SOON" },
+  {
+    when: "Julio · 2026",
+    name: "Pilates & Wine",
+    place: "Viña do Grobe",
+    desc: "Masterclass de pilates, paseo por la viña y picoteo con vino de la zona. Fecha por confirmar.",
+    confirmed: false,
+  },
+  { when: "Agosto · 2026",     name: "COMING SOON" },
+  { when: "Septiembre · 2026", name: "COMING SOON" },
 ];
 
 export const SLOTS = ["Pilates Mat", "Pilates Sculpt", "Clase única"];

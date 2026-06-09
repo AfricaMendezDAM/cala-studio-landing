@@ -4,7 +4,7 @@ import { EVENT_TEASERS, LOCATION } from "../data.js";
 function EventsCard() {
   return (
     <div className="events-card">
-      <span className="badge"><span className="y"></span>Coming soon</span>
+      <span className="badge"><span className="y"></span>Agenda verano</span>
       <h3>Eventos de <em>verano</em></h3>
       <p>
         Estamos cerrando las fechas. Apúntate a la lista de espera y serás
@@ -12,8 +12,11 @@ function EventsCard() {
       </p>
       <div className="teasers">
         {EVENT_TEASERS.map((e, i) => (
-          <div key={i} className="teaser">
-            <span className="when">{e.when}</span>
+          <div key={i} className={"teaser" + (e.place ? " teaser-confirmed" : "")}>
+            <div className="teaser-left">
+              <span className="when">{e.when}</span>
+              {e.place && <span className="place">{e.place}</span>}
+            </div>
             <span className="name">{e.name}</span>
           </div>
         ))}
