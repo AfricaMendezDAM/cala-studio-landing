@@ -110,8 +110,28 @@
   font-size:9.5px; letter-spacing:.3em; text-transform:uppercase;
   color: var(--ink-mute);
 }
+.group-tabs{ display:none; }
+
 @media (max-width: 880px){
   .group-card{ grid-column: span 12; }
+  .group-card.mob-hidden{ display:none; }
+
+  .group-tabs{
+    display:flex; gap:8px;
+    margin-bottom: 16px;
+  }
+  .group-tab{
+    flex:1;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 10px; letter-spacing:.28em; text-transform:uppercase;
+    font-weight:600; color: var(--ink-mute);
+    transition: all .2s ease;
+    font-family: inherit;
+  }
+  .group-tab em{ font-style:italic; font-weight:400; }
+  .group-tab.on{ background: var(--ink); color:#FFF; border-color: var(--ink); }
 }
 
 /* TARIFAS */
@@ -195,5 +215,15 @@
 .price-card.featured .price-cta:hover{ background: #FFF; border-color: #FFF; }
 
 @media (max-width: 880px){
-  .pricing{ grid-template-columns: 1fr; }
+  .pricing{
+    grid-template-columns: repeat(3, calc(100vw - 40px));
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -20px;
+    padding: 0 20px 4px;
+  }
+  .pricing::-webkit-scrollbar{ display:none; }
+  .price-card{ scroll-snap-align: start; }
 }

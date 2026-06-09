@@ -1,9 +1,10 @@
+import { useState } from "react";
 import Section from "./Section.jsx";
 import { GROUPS } from "../data.js";
 
-function GroupCard({ group }) {
+function GroupCard({ group, hidden }) {
   return (
-    <a href="#reserva" className="group-card">
+    <a href="#reserva" className={"group-card" + (hidden ? " mob-hidden" : "")}>
       <div className="head">
         <span className="num">{group.num}</span>
         <span className="tag">{group.tag}</span>
@@ -24,6 +25,7 @@ function GroupCard({ group }) {
 }
 
 export default function Grupos() {
+  const [active, setActive] = useState(0);
   return (
     <Section
       id="grupos"
@@ -34,8 +36,19 @@ export default function Grupos() {
         experiencia, empieza por Mat. Si ya practicas, Sculpt es tu sitio.
       </>}
     >
+      <div className="group-tabs">
+        {GROUPS.map((g, i) => (
+          <button
+            key={i}
+            className={"group-tab" + (active === i ? " on" : "")}
+            onClick={() => setActive(i)}
+          >
+            {g.name} <em>{g.nameEm}</em>
+          </button>
+        ))}
+      </div>
       <div className="grid-12">
-        {GROUPS.map((g, i) => <GroupCard key={i} group={g} />)}
+        {GROUPS.map((g, i) => <GroupCard key={i} group={g} hidden={active !== i} />)}
       </div>
     </Section>
   );
