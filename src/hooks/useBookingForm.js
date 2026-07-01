@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 // Crea tu formulario en https://formspree.io y pega aquí el ID
-const FORMSPREE_ID = "TU_FORM_ID";
+const FORMSPREE_ID = "xnjkglwj";
 
 const DRAFT_KEY   = "cala.bookingDraft";
 const HISTORY_KEY = "cala.bookings";
