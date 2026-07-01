@@ -86,6 +86,37 @@ export const EVENT_TEASERS = [
   { when: "Septiembre · 2026", name: "COMING SOON" },
 ];
 
+export const BONOS = [
+  {
+    label: "Flexible",
+    name: "Bono",
+    nameEm: "5 clases",
+    amount: 65,
+    per: "/ bono",
+    items: [
+      "5 clases a usar antes del 31 ago",
+      "Mat y material incluidos",
+      "Combinables Mat + Sculpt",
+    ],
+    cta: "Reservar bono",
+  },
+  {
+    label: "Más ahorro",
+    name: "Bono",
+    nameEm: "10 clases",
+    amount: 120,
+    per: "/ bono",
+    items: [
+      "10 clases a usar antes del 31 ago",
+      "Mat y material incluidos",
+      "Combinables Mat + Sculpt",
+      "Prioridad en eventos del estudio",
+    ],
+    cta: "Reservar bono",
+    featured: true,
+  },
+];
+
 export const SLOTS = ["Pilates Mat", "Pilates Sculpt", "Clase única"];
 
 export const LOCATION = {

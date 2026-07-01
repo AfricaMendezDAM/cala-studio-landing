@@ -1,5 +1,5 @@
 import Section from "./Section.jsx";
-import { PRICING } from "../data.js";
+import { PRICING, BONOS } from "../data.js";
 
 function PriceCard({ plan }) {
   return (
@@ -32,6 +32,12 @@ export default function Tarifas() {
     >
       <div className="pricing">
         {PRICING.map((p, i) => <PriceCard key={i} plan={p} />)}
+      </div>
+      <div className="bonos-head">
+        <span className="bonos-label">Bonos · Válidos hasta el 31 de agosto</span>
+      </div>
+      <div className="pricing bonos-grid">
+        {BONOS.map((p, i) => <PriceCard key={i} plan={p} />)}
       </div>
     </Section>
   );

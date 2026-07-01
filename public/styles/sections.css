@@ -214,7 +214,22 @@
 }
 .price-card.featured .price-cta:hover{ background: #FFF; border-color: #FFF; }
 
+.bonos-head{
+  margin-top: 28px; margin-bottom: 14px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.bonos-label{
+  font-size: 9.5px; letter-spacing:.4em; text-transform:uppercase;
+  color: var(--ink-mute); font-weight:600;
+}
+.bonos-grid{
+  grid-template-columns: repeat(2, 1fr) !important;
+  max-width: 680px;
+}
+
 @media (max-width: 880px){
+  .bonos-grid{ max-width: 100%; }
   .pricing{
     grid-template-columns: repeat(3, calc(100vw - 40px));
     overflow-x: auto;

@@ -5,7 +5,10 @@ const STUDIO_LINKS = [
   { href: "#ubicacion", label: "Ubicación" },
 ];
 
-const CONTACT = ["+34 644 39 31 85", "@cala.studio"];
+const CONTACT = [
+  { label: "+34 644 39 31 85", href: "tel:+34644393185" },
+  { label: "@cala_studio_pilates", href: "https://www.instagram.com/cala_studio_pilates/" },
+];
 
 const BOTTOM = ["© 2026 - cala·studio", "Edición Verano", "Made on the Atlantic"];
 
@@ -29,7 +32,11 @@ export default function Footer() {
       <div>
         <h4>Contacto</h4>
         <ul>
-          {CONTACT.map(c => <li key={c}>{c}</li>)}
+          {CONTACT.map(c => (
+            <li key={c.label}>
+              <a href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noopener">{c.label}</a>
+            </li>
+          ))}
         </ul>
       </div>
       <div className="bottom">
