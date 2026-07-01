@@ -91,5 +91,5 @@ export const SLOTS = ["Pilates Mat", "Pilates Sculpt", "Clase única"];
 export const LOCATION = {
   mapSrc: "https://www.openstreetmap.org/export/embed.html?bbox=-8.9339%2C42.4525%2C-8.8939%2C42.4725&layer=mapnik&marker=42.462495%2C-8.913941",
   directionsHref: "https://www.google.com/maps/place/42%C2%B027'45.0%22N+8%C2%B054'50.2%22W/@42.4625093,-8.9323949,15z/data=!3m1!4b1!4m7!1m2!2m1!1scarretera+san+vicente+do+mar+!3m3!8m2!3d42.462495!4d-8.913941?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
-  address: { street: "Carretera San Vicente do Mar 1100", city: "36989 -O Grove, Pontevedra" },
+  address: { street: "Restaurante Meloxeira · Praia Área da Cruz", city: "San Vicente do Mar, O Grove" },
 };
