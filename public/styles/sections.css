@@ -225,11 +225,11 @@
 }
 .bonos-grid{
   grid-template-columns: repeat(2, 1fr) !important;
-  max-width: 680px;
 }
 
 @media (max-width: 880px){
-  .bonos-grid{ max-width: 100%; }
+  .bonos-grid{
+    grid-template-columns: repeat(2, calc(100vw - 40px)) !important;
   .pricing{
     grid-template-columns: repeat(3, calc(100vw - 40px));
     overflow-x: auto;
