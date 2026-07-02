@@ -10,13 +10,13 @@ const CONTACT = [
   { label: "@cala_studio_pilates", href: "https://www.instagram.com/cala_studio_pilates/" },
 ];
 
-const BOTTOM = ["© 2026 - cala·studio", "Edición Verano", "Made on the Atlantic"];
+const BOTTOM = ["© 2026 - calastudio", "Edición Verano", "Made on the Atlantic"];
 
 export default function Footer() {
   return (
     <footer>
       <div className="brand-block">
-        <div className="logo">cala<span className="dot"></span>studio</div>
+        <div className="logo">calastudio</div>
         <div className="tag">
           Pilates de costa . San vicente do Mar, 2026.
         </div>

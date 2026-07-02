@@ -6,7 +6,7 @@ export default function MobileBack({ onBack }) {
           <path d="M19 12H5M12 5l-7 7 7 7"/>
         </svg>
       </button>
-      <span className="m3-back-brand">cala<span>·</span>studio</span>
+      <span className="m3-back-brand">calastudio</span>
     </div>
   );
 }

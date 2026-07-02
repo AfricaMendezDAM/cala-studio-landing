@@ -20,7 +20,7 @@ export default function Nav() {
   return (
     <nav className={"nav" + (scrolled ? " scrolled" : "")}>
       <a href="#top" className="brand">
-        cala<span className="dot"></span>studio
+        calastudio
       </a>
       <div className="links">
         {LINKS.map(l => <a key={l.href} href={l.href}>{l.label}</a>)}

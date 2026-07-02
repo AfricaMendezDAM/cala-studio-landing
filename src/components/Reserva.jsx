@@ -52,7 +52,7 @@ function PolicyConsent({ checked, onChange, error }) {
           </div>
           <div className="policy-section">
             <strong>Vigencia de bonos y clases</strong>
-            <p>La actividad de cala·studio finaliza el 31 de agosto de 2026. Los bonos adquiridos son válidos únicamente hasta esa fecha y no se reembolsará el importe de las sesiones no canjeadas.</p>
+            <p>La actividad de calastudio finaliza el 31 de agosto de 2026. Los bonos adquiridos son válidos únicamente hasta esa fecha y no se reembolsará el importe de las sesiones no canjeadas.</p>
           </div>
           <div className="policy-section">
             <strong>Protección de datos</strong>
