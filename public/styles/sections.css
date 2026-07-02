@@ -227,18 +227,48 @@
   grid-template-columns: repeat(2, 1fr) !important;
 }
 
+/* Carrusel móvil de tarifas */
+.price-carousel{
+  display: none;
+  position: relative;
+  padding: 0 44px;
+}
+.carousel-card-link{
+  display: block;
+}
+.carousel-card-link .price-card{
+  margin: 0;
+}
+.carousel-btn{
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  display: grid; place-items: center;
+  z-index: 2;
+  transition: all .2s ease;
+}
+.carousel-btn:hover{ background: var(--ink); color: #FFF; border-color: var(--ink); }
+.carousel-btn svg{ width: 16px; height: 16px; }
+.carousel-prev{ left: 0; }
+.carousel-next{ right: 0; }
+.carousel-dots{
+  display: flex; justify-content: center; gap: 6px;
+  margin-top: 16px;
+}
+.carousel-dot{
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--line);
+  transition: background .2s ease, transform .2s ease;
+}
+.carousel-dot.on{
+  background: var(--ink);
+  transform: scale(1.3);
+}
+
 @media (max-width: 880px){
-  .bonos-grid{
-    grid-template-columns: repeat(2, 82vw) !important;
-  }
-  .pricing{
-    grid-template-columns: repeat(3, 82vw);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 4px;
-  }
-  .pricing::-webkit-scrollbar{ display:none; }
-  .price-card{ scroll-snap-align: start; }
+  .bonos-grid{ grid-template-columns: repeat(2, 1fr) !important; }
+  .pricing{ grid-template-columns: 1fr; }
+  .price-carousel{ display: block; }
 }

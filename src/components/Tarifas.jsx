@@ -1,5 +1,7 @@
+import { useState } from "react";
 import Section from "./Section.jsx";
 import { PRICING, BONOS } from "../data.js";
+import { useMobile } from "../hooks/useMobile.js";
 
 function PriceCard({ plan }) {
   return (
@@ -20,25 +22,69 @@ function PriceCard({ plan }) {
   );
 }
 
+function Carousel({ plans }) {
+  const [idx, setIdx] = useState(0);
+  const prev = () => setIdx(i => (i - 1 + plans.length) % plans.length);
+  const next = () => setIdx(i => (i + 1) % plans.length);
+
+  return (
+    <div className="price-carousel">
+      <button className="carousel-btn carousel-prev" onClick={prev} aria-label="Anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+
+      <a href="#reserva" className="carousel-card-link">
+        <PriceCard plan={plans[idx]} />
+      </a>
+
+      <button className="carousel-btn carousel-next" onClick={next} aria-label="Siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+
+      <div className="carousel-dots">
+        {plans.map((_, i) => (
+          <button key={i} className={"carousel-dot" + (i === idx ? " on" : "")} onClick={() => setIdx(i)} aria-label={`Tarifa ${i + 1}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Tarifas() {
+  const mobile = useMobile();
+
   return (
     <Section
       id="tarifas"
       num="II · Tarifas"
       title={<>Tarifas</>}
-      right={<>
-        Mat y material incluidos. IVA incluido.
-      </>}
+      right={<>Mat y material incluidos. IVA incluido.</>}
     >
-      <div className="pricing">
-        {PRICING.map((p, i) => <PriceCard key={i} plan={p} />)}
-      </div>
-      <div className="bonos-head">
-        <span className="bonos-label">Bonos · Válidos hasta el 31 de agosto</span>
-      </div>
-      <div className="pricing bonos-grid">
-        {BONOS.map((p, i) => <PriceCard key={i} plan={p} />)}
-      </div>
+      {mobile ? (
+        <>
+          <Carousel plans={PRICING} />
+          <div className="bonos-head">
+            <span className="bonos-label">Bonos · Válidos hasta el 31 de agosto</span>
+          </div>
+          <Carousel plans={BONOS} />
+        </>
+      ) : (
+        <>
+          <div className="pricing">
+            {PRICING.map((p, i) => <PriceCard key={i} plan={p} />)}
+          </div>
+          <div className="bonos-head">
+            <span className="bonos-label">Bonos · Válidos hasta el 31 de agosto</span>
+          </div>
+          <div className="pricing bonos-grid">
+            {BONOS.map((p, i) => <PriceCard key={i} plan={p} />)}
+          </div>
+        </>
+      )}
     </Section>
   );
 }
