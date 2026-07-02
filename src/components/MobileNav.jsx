@@ -33,25 +33,20 @@ function IconReserva() {
 }
 
 const TABS = [
-  { id: "grupos",  label: "Grupos",   Icon: IconGrupos  },
-  { id: "tarifas", label: "Tarifas",  Icon: IconTarifas },
-  { id: "eventos", label: "Agenda",   Icon: IconAgenda  },
-  { id: "reserva", label: "Reservar", Icon: IconReserva },
+  { href: "#grupos",  label: "Grupos",   Icon: IconGrupos  },
+  { href: "#tarifas", label: "Tarifas",  Icon: IconTarifas },
+  { href: "#eventos", label: "Agenda",   Icon: IconAgenda  },
+  { href: "#reserva", label: "Reservar", Icon: IconReserva },
 ];
 
-export default function MobileNav({ view, setView }) {
+export default function MobileNav() {
   return (
     <nav className="m3-nav">
-      {TABS.map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          className={"m3-tab" + (view === id ? " active" : "")}
-          onClick={() => setView(id)}
-          aria-label={label}
-        >
+      {TABS.map(({ href, label, Icon }) => (
+        <a key={href} href={href} className="m3-tab" aria-label={label}>
           <span className="m3-indicator"><Icon /></span>
           <span className="m3-label">{label}</span>
-        </button>
+        </a>
       ))}
     </nav>
   );

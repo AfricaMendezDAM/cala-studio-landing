@@ -1,51 +1,44 @@
-/* Mobile M3 — solo activo en dispositivos ≤ 880px vía JS (useMobile) */
+/* Mobile M3 — activo en ≤ 880px vía useMobile() */
 
-.m3-app {
+html{ scroll-behavior: smooth; }
+
+.m3-app{
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
 }
 
-.m3-main {
-  flex: 1;
-  overflow-y: auto;
+.m3-main{
+  padding-top: 56px;
   padding-bottom: 80px;
 }
 
-/* Hero compacto sin nav fija encima */
-.m3-app .hero-inner {
-  padding-top: 48px;
-}
-
-/* Barra de volver */
-.m3-back {
-  position: sticky; top: 0; z-index: 50;
+/* Top bar — siempre visible, vuelve al inicio al tocarla */
+.m3-topbar{
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
   height: 56px;
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 8px 0 4px;
+  display: flex; align-items: center; padding: 0 20px;
   background: rgba(255,255,255,.94);
   backdrop-filter: blur(14px) saturate(120%);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
   border-bottom: 1px solid var(--line-soft);
 }
-.m3-back-btn {
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  display: grid; place-items: center;
-  color: var(--ink);
-  transition: background .18s ease;
-  flex-shrink: 0;
-}
-.m3-back-btn:active { background: var(--bg-2); }
-.m3-back-btn svg { width: 20px; height: 20px; }
-.m3-back-brand {
+.m3-topbar-brand{
   font-weight: 600; letter-spacing: .3em; text-transform: uppercase;
   font-size: 12px; color: var(--ink);
 }
-.m3-back-brand span { color: var(--yellow); }
+
+/* Hero: descuenta top bar y bottom nav */
+.m3-app .hero{
+  height: calc(100dvh - 56px - 80px);
+  min-height: 480px;
+}
+.m3-app .hero-inner{
+  padding-top: 32px;
+}
 
 /* Navegación inferior */
-.m3-nav {
+.m3-nav{
   position: fixed; bottom: 0; left: 0; right: 0;
   height: 80px;
   display: flex;
@@ -58,7 +51,7 @@
   z-index: 100;
 }
 
-.m3-tab {
+.m3-tab{
   flex: 1;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px;
@@ -67,20 +60,21 @@
   font-family: inherit;
   transition: color .2s ease;
 }
-.m3-tab.active { color: var(--ink); }
+.m3-tab:hover{ color: var(--ink); }
 
-.m3-indicator {
+.m3-indicator{
   width: 64px; height: 32px;
   display: grid; place-items: center;
   border-radius: 999px;
   transition: background .2s ease;
 }
-.m3-tab.active .m3-indicator {
+.m3-tab:hover .m3-indicator,
+.m3-tab:focus .m3-indicator{
   background: var(--bg-2);
 }
-.m3-indicator svg { width: 22px; height: 22px; }
+.m3-indicator svg{ width: 22px; height: 22px; }
 
-.m3-label {
+.m3-label{
   font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase;
   font-weight: 600; line-height: 1;
 }
