@@ -229,15 +229,15 @@
 
 @media (max-width: 880px){
   .bonos-grid{
-    grid-template-columns: repeat(2, calc(100vw - 40px)) !important;
+    grid-template-columns: repeat(2, 82vw) !important;
+  }
   .pricing{
-    grid-template-columns: repeat(3, calc(100vw - 40px));
+    grid-template-columns: repeat(3, 82vw);
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    margin: 0 -20px;
-    padding: 0 20px 4px;
+    padding-bottom: 4px;
   }
   .pricing::-webkit-scrollbar{ display:none; }
   .price-card{ scroll-snap-align: start; }

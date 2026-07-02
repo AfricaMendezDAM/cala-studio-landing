@@ -75,7 +75,6 @@ export const PRICING = [
 ];
 
 export const EVENT_TEASERS = [
-  { when: "Julio · 2026",      name: "COMING SOON" },
   {
     when: "Agosto · 2026",
     name: "Pilates & Wine",
