@@ -214,6 +214,46 @@
 }
 .price-card.featured .price-cta:hover{ background: #FFF; border-color: #FFF; }
 
+/* Aviso de tarifas de apertura / precio de lanzamiento */
+.launch-note{
+  display:flex; align-items:flex-start; gap: 14px;
+  margin-bottom: 22px;
+  padding: 14px 18px;
+  background: rgba(217,182,90,.09);
+  border: 1px solid rgba(217,182,90,.35);
+  border-radius: 999px;
+}
+.launch-dot{
+  position:relative; flex:none; margin-top: 5px;
+  width: 8px; height: 8px; border-radius:50%;
+  background: var(--yellow);
+}
+.launch-dot::after{
+  content:""; position:absolute; inset:0;
+  border-radius:50%; background: var(--yellow);
+  animation: launch-ping 2.4s cubic-bezier(0,0,.2,1) infinite;
+}
+@keyframes launch-ping{
+  0%   { transform: scale(1);   opacity:.7; }
+  70%  { transform: scale(2.6); opacity:0; }
+  100% { transform: scale(2.6); opacity:0; }
+}
+.launch-copy{ display:flex; flex-direction:column; gap: 3px; }
+.launch-eyebrow{
+  font-size: 9.5px; letter-spacing:.34em; text-transform:uppercase;
+  color: var(--ink); font-weight:700;
+}
+.launch-text{
+  font-size: 12.5px; line-height:1.5; color: var(--ink-soft);
+}
+.launch-text strong{ color: var(--ink); font-weight:600; }
+@media (max-width: 880px){
+  .launch-note{ border-radius: 14px; padding: 13px 16px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .launch-dot::after{ animation:none; }
+}
+
 .bonos-head{
   margin-top: 28px; margin-bottom: 14px;
   padding-top: 22px;

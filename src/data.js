@@ -1,3 +1,10 @@
+export const CONTACT = {
+  phoneLabel: "+34 644 39 31 85",
+  phoneHref: "tel:+34644393185",
+  instagramLabel: "@calastudio.es",
+  instagramHref: "https://www.instagram.com/calastudio.es/",
+};
+
 export const HERO_SLIDES = [
   { img: "assets/carousel-01.png",        label: "Atardecer" },
   { img: "assets/hero.jpg", label: "Mat outdoor · Frente al mar" },
@@ -44,6 +51,7 @@ export const PRICING = [
       "Ideal para probar el método",
     ],
     cta: "Reservar clase",
+    href: "#/reservar",
   },
   {
     label: "Más popular",
@@ -56,7 +64,9 @@ export const PRICING = [
       "Plaza fija en horario elegido",
       "Prioridad en eventos del estudio",
     ],
-    cta: "Empezar el mes",
+    cta: "Quiero mi plaza fija",
+    href: "#contacto",
+    interes: "mensual-1",
     featured: true,
   },
   {
@@ -70,7 +80,9 @@ export const PRICING = [
       "Mat + Sculpt combinables",
       "Prioridad en eventos del estudio",
     ],
-    cta: "Empezar el mes",
+    cta: "Quiero mi plaza fija",
+    href: "#contacto",
+    interes: "mensual-2",
   },
 ];
 
@@ -97,7 +109,9 @@ export const BONOS = [
       "Mat y material incluidos",
       "Combinables Mat + Sculpt",
     ],
-    cta: "Reservar bono",
+    cta: "Quiero este bono",
+    href: "#contacto",
+    interes: "bono-5",
   },
   {
     label: "Más ahorro",
@@ -111,15 +125,28 @@ export const BONOS = [
       "Combinables Mat + Sculpt",
       "Prioridad en eventos del estudio",
     ],
-    cta: "Reservar bono",
+    cta: "Quiero este bono",
+    href: "#contacto",
+    interes: "bono-10",
     featured: true,
   },
 ];
 
-export const SLOTS = ["Pilates Mat", "Pilates Sculpt", "Clase única"];
+export const CONTACT_INTERES = [
+  { value: "duda",      label: "Una duda general" },
+  { value: "mensual-1", label: "Mensualidad · 1 clase/semana" },
+  { value: "mensual-2", label: "Mensualidad · 2 clases/semana" },
+  { value: "bono-5",    label: "Bono · 5 clases" },
+  { value: "bono-10",   label: "Bono · 10 clases" },
+  { value: "evento",    label: "Eventos / grupo privado" },
+];
 
 export const LOCATION = {
   mapSrc: "https://www.openstreetmap.org/export/embed.html?bbox=-8.9339%2C42.4525%2C-8.8939%2C42.4725&layer=mapnik&marker=42.462495%2C-8.913941",
   directionsHref: "https://www.google.com/maps/place/42%C2%B027'45.0%22N+8%C2%B054'50.2%22W/@42.4625093,-8.9323949,15z/data=!3m1!4b1!4m7!1m2!2m1!1scarretera+san+vicente+do+mar+!3m3!8m2!3d42.462495!4d-8.913941?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
-  address: { street: "Explanada Restaurante Meloxeira · Praia da Cruz", city: "Carretera San Vicente do Mar 1100, 36989 O Grove" },
+  address: { street: "Terraza Restaurante Meloxeira Praia", city: "Carretera San Vicente do Mar 1100, 36989 O Grove" },
+  partner: {
+    name: "Restaurante Meloxeira",
+    logo: "assets/logo-nuevo-taberna-meloxeira.png",
+  },
 };

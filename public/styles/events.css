@@ -126,7 +126,44 @@
   box-shadow: 0 0 0 3px rgba(217,182,90,.3);
 }
 
+.venue-lockup{
+  margin-top: 18px;
+  padding: 28px 28px 30px;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  background: var(--bg-2);
+  display:flex; flex-direction:column; align-items:center; gap: 16px;
+  text-align:center;
+}
+.venue-lockup .venue-eyebrow{
+  font-size: 9.5px; letter-spacing:.4em; text-transform:uppercase;
+  color: var(--ink-mute); font-weight:600;
+}
+.venue-lockup .venue-marks{
+  display:flex; align-items:center; justify-content:center;
+  gap: 26px; flex-wrap:wrap;
+}
+.venue-lockup .v-cala{
+  font-size: 22px; font-weight:600; letter-spacing:.28em; text-transform:uppercase;
+  color: var(--ink); white-space:nowrap;
+}
+.venue-lockup .v-cala .dot{ color: var(--yellow); margin: 0 3px; }
+.venue-lockup .v-x{
+  font-size: 16px; color: var(--ink-mute); font-weight:300;
+}
+.venue-lockup .v-melox{
+  height: 72px; width:auto; display:block;
+}
+.venue-lockup .venue-sub{
+  font-size: 12.5px; line-height: 1.6; color: var(--ink-soft); max-width: 440px;
+}
+.venue-lockup .venue-sub strong{ font-weight:600; color: var(--ink); }
+
 @media (max-width: 880px){
   .row-info{ grid-template-columns: 1fr; }
   .map-card{ min-height: 320px; }
+  .venue-lockup{ padding: 24px 18px 26px; }
+  .venue-lockup .venue-marks{ gap: 18px; }
+  .venue-lockup .v-cala{ font-size: 18px; }
+  .venue-lockup .v-melox{ height: 58px; }
 }

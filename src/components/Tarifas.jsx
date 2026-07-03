@@ -3,6 +3,11 @@ import Section from "./Section.jsx";
 import { PRICING, BONOS } from "../data.js";
 import { useMobile } from "../hooks/useMobile.js";
 
+// Prerrellena el interés del formulario de contacto (mensual / bono).
+function fireInteres(plan) {
+  if (plan.interes) window.dispatchEvent(new CustomEvent("cala:interes", { detail: plan.interes }));
+}
+
 function PriceCard({ plan }) {
   return (
     <article className={"price-card" + (plan.featured ? " featured" : "")}>
@@ -17,7 +22,7 @@ function PriceCard({ plan }) {
       <ul>
         {plan.items.map((it, j) => <li key={j}>{it}</li>)}
       </ul>
-      <a href="#reserva" className="price-cta">{plan.cta}</a>
+      <a href={plan.href} className="price-cta" onClick={() => fireInteres(plan)}>{plan.cta}</a>
     </article>
   );
 }
@@ -35,7 +40,7 @@ function Carousel({ plans }) {
         </svg>
       </button>
 
-      <a href="#reserva" className="carousel-card-link">
+      <a href={plans[idx].href} className="carousel-card-link" onClick={() => fireInteres(plans[idx])}>
         <PriceCard plan={plans[idx]} />
       </a>
 
@@ -64,6 +69,16 @@ export default function Tarifas() {
       title={<>Tarifas</>}
       right={<>Mat y material incluidos. IVA incluido.</>}
     >
+      <div className="launch-note">
+        <span className="launch-dot" aria-hidden="true"></span>
+        <div className="launch-copy">
+          <span className="launch-eyebrow">Tarifas de apertura</span>
+          <span className="launch-text">
+            Precio de lanzamiento reservado a las <strong>primeras inscripciones</strong>.
+          </span>
+        </div>
+      </div>
+
       {mobile ? (
         <>
           <Carousel plans={PRICING} />

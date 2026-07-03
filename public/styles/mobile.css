@@ -24,9 +24,11 @@ html{ scroll-behavior: smooth; }
   border-bottom: 1px solid var(--line-soft);
 }
 .m3-topbar-brand{
+  display: inline-flex; align-items: center; gap: 9px;
   font-weight: 600; letter-spacing: .3em; text-transform: uppercase;
   font-size: 12px; color: var(--ink);
 }
+.m3-topbar-brand .brand-mark{ width: 20px; height: 20px; flex: none; }
 
 /* Hero: descuenta top bar y bottom nav */
 .m3-app .hero{

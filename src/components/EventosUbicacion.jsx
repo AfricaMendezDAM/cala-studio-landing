@@ -49,6 +49,24 @@ function MapCard() {
   );
 }
 
+function VenueLockup() {
+  const { partner } = LOCATION;
+  return (
+    <div className="venue-lockup">
+      <span className="venue-eyebrow">Nuestra casa este verano</span>
+      <div className="venue-marks">
+        <span className="v-cala">cala<span className="dot">.</span>studio</span>
+        <span className="v-x">×</span>
+        <img className="v-melox" src={partner.logo} alt={partner.name} loading="lazy" />
+      </div>
+      <p className="venue-sub">
+        Todas las clases se celebran en la <strong>Terraza Restaurante Meloxeira Praia</strong>,
+        frente al mar.
+      </p>
+    </div>
+  );
+}
+
 export default function EventosUbicacion() {
   return (
     <Section
@@ -56,13 +74,14 @@ export default function EventosUbicacion() {
       num="III · Agenda & Ubicación"
       title={<>Eventos <em></em></>}
       right={<>
-      
+
       </>}
     >
       <div className="row-info">
         <EventsCard />
         <MapCard />
       </div>
+      <VenueLockup />
     </Section>
   );
 }

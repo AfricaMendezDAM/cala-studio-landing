@@ -1,22 +1,22 @@
 import { useState, useEffect, useRef } from "react";
+import { CONTACT_INTERES } from "../data.js";
 
-// Crea tu formulario en https://formspree.io y pega aquí el ID
+// Formulario de contacto / dudas. Envía por email vía Formspree.
+// (Reservar plaza NO pasa por aquí: eso vive en el calendario, #/reservar.)
 const FORMSPREE_ID = "xnjkglwj";
 
-const DRAFT_KEY   = "cala.bookingDraft";
-const HISTORY_KEY = "cala.bookings";
+const DRAFT_KEY = "cala.contactDraft";
 
 export const initialForm = {
-  nombre: "", apellidos: "",
-  email: "",  telefono: "",
-  grupo: "mat",
-  tarifa: "mensual-1",
-  fecha: "",
-  experiencia: "principiante",
-  preferencias: [],
+  nombre: "",
+  email: "",
+  telefono: "",
+  interes: "duda",
   mensaje: "",
   consent: false,
 };
+
+const labelFor = (v) => CONTACT_INTERES.find(o => o.value === v)?.label ?? v;
 
 function readDraft() {
   try {
@@ -24,13 +24,6 @@ function readDraft() {
     if (raw) return { ...initialForm, ...JSON.parse(raw) };
   } catch {}
   return initialForm;
-}
-
-function appendHistory(submission) {
-  let history = [];
-  try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch {}
-  history.push(submission);
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history, null, 2)); } catch {}
 }
 
 function validate(form) {
@@ -42,10 +35,10 @@ function validate(form) {
   return e;
 }
 
-export function useBookingForm() {
-  const [form, setForm]     = useState(readDraft);
-  const [errors, setErrors] = useState({});
-  const [toast, setToast]   = useState("");
+export function useContactForm() {
+  const [form, setForm]       = useState(readDraft);
+  const [errors, setErrors]   = useState({});
+  const [toast, setToast]     = useState("");
   const [sending, setSending] = useState(false);
   const toastTimer = useRef(null);
 
@@ -54,11 +47,6 @@ export function useBookingForm() {
   }, [form]);
 
   const upd = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  const togglePref = (slot) => setForm(f => {
-    const has = f.preferencias.includes(slot);
-    return { ...f, preferencias: has ? f.preferencias.filter(s => s !== slot) : [...f.preferencias, slot] };
-  });
 
   const flash = (msg) => {
     setToast(msg);
@@ -73,7 +61,8 @@ export function useBookingForm() {
     if (Object.keys(e).length) { flash("Revisa los campos marcados"); return; }
 
     const submission = {
-      id: "CALA-" + Date.now().toString(36).toUpperCase(),
+      _subject: `Contacto web · ${labelFor(form.interes)}`,
+      interesLabel: labelFor(form.interes),
       createdAt: new Date().toISOString(),
       ...form,
     };
@@ -86,16 +75,15 @@ export function useBookingForm() {
         body: JSON.stringify(submission),
       });
       if (!res.ok) throw new Error();
-      appendHistory(submission);
       localStorage.removeItem(DRAFT_KEY);
       setForm(initialForm);
-      flash("¡Mensaje enviado! Nos pondremos en contacto contigo lo antes posible.");
+      flash("Mensaje enviado · te escribimos pronto");
     } catch {
-      flash("Algo ha fallado, inténtalo de nuevo o escríbenos directamente.");
+      flash("No se ha podido enviar · inténtalo otra vez o escríbenos por Instagram");
     } finally {
       setSending(false);
     }
   };
 
-  return { form, errors, toast, sending, upd, togglePref, submit };
+  return { form, errors, toast, sending, upd, submit };
 }

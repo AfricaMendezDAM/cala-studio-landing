@@ -1,0 +1,86 @@
+/* Botón de contacto → llamada directa. Píldora táctil, editorial, viva. */
+.call{
+  display:inline-flex; align-items:center; gap:14px;
+  padding: 10px 18px 10px 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(31,30,28,.04);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.call:hover{
+  transform: translateY(-2px);
+  border-color: rgba(47,107,150,.35);
+  box-shadow: 0 18px 30px -18px rgba(47,107,150,.45);
+}
+
+/* Moneda-icono con teléfono */
+.call-coin{
+  position:relative;
+  flex:none;
+  width: 42px; height: 42px;
+  display:grid; place-items:center;
+  border-radius: 50%;
+  background: var(--ink); color: #FFF;
+  transition: background .25s ease;
+}
+.call:hover .call-coin{ background: var(--blue); }
+.call-coin svg{ width: 18px; height: 18px; }
+
+/* Punto "disponible" con latido suave */
+.call-pulse{
+  position:absolute; top: 2px; right: 2px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--yellow);
+  box-shadow: 0 0 0 2px var(--paper);
+}
+.call-pulse::after{
+  content:""; position:absolute; inset:0;
+  border-radius:50%; background: var(--yellow);
+  animation: call-ping 2.4s cubic-bezier(0,0,.2,1) infinite;
+}
+@keyframes call-ping{
+  0%   { transform: scale(1);   opacity:.7; }
+  70%  { transform: scale(2.6); opacity:0; }
+  100% { transform: scale(2.6); opacity:0; }
+}
+
+/* Texto */
+.call-text{ display:flex; flex-direction:column; gap:2px; line-height:1; }
+.call-eyebrow{
+  font-size: 8.5px; letter-spacing:.32em; text-transform:uppercase;
+  color: var(--ink-mute); font-weight:600;
+}
+.call-number{
+  font-size: 15px; font-weight:500; letter-spacing:.01em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  transition: color .25s ease;
+}
+.call:hover .call-number{ color: var(--blue-deep); }
+
+/* Flecha */
+.call-arrow{
+  flex:none; width: 14px; height: 1px; margin-left: 2px;
+  background: var(--ink-mute); position:relative;
+  transition: transform .25s ease, background .25s ease;
+}
+.call-arrow::after{
+  content:""; position:absolute; right:0; top:-3px;
+  width: 6px; height: 6px;
+  border-top:1px solid var(--ink-mute); border-right:1px solid var(--ink-mute);
+  transform: rotate(45deg);
+  transition: border-color .25s ease;
+}
+.call:hover .call-arrow{ transform: translateX(3px); background: var(--blue); }
+.call:hover .call-arrow::after{ border-color: var(--blue); }
+
+/* Variante inline dentro de bloques de texto */
+.call-inline{ margin-top: 20px; }
+
+@media (prefers-reduced-motion: reduce){
+  .call, .call-coin, .call-number, .call-arrow{ transition:none; }
+  .call:hover{ transform:none; }
+  .call-pulse::after{ animation:none; }
+}

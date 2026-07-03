@@ -35,8 +35,8 @@ function IconReserva() {
 const TABS = [
   { href: "#grupos",  label: "Grupos",   Icon: IconGrupos  },
   { href: "#tarifas", label: "Tarifas",  Icon: IconTarifas },
-  { href: "#eventos", label: "Agenda",   Icon: IconAgenda  },
-  { href: "#reserva", label: "Reservar", Icon: IconReserva },
+  { href: "#eventos", label: "Eventos",  Icon: IconAgenda  },
+  { href: "#/reservar", label: "Reservar", Icon: IconReserva },
 ];
 
 export default function MobileNav() {

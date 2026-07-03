@@ -1,43 +1,23 @@
-const STUDIO_LINKS = [
-  { href: "#grupos",    label: "Grupos" },
-  { href: "#tarifas",   label: "Tarifas" },
-  { href: "#eventos",   label: "Eventos" },
-  { href: "#ubicacion", label: "Ubicación" },
-];
+import CallButton from "./CallButton.jsx";
+import { CONTACT } from "../data.js";
 
-const CONTACT = [
-  { label: "+34 644 39 31 85", href: "tel:+34644393185" },
-  { label: "@cala_studio_pilates", href: "https://www.instagram.com/cala_studio_pilates/" },
-];
-
-const BOTTOM = ["© 2026 - calastudio", "Edición Verano", "Made on the Atlantic"];
+const BOTTOM = ["© 2026 - cala.studio", "Edición Verano", "Made on the Atlantic"];
 
 export default function Footer() {
   return (
     <footer>
       <div className="brand-block">
-        <div className="logo">calastudio</div>
+        <div className="logo">cala.studio</div>
         <div className="tag">
           Pilates de costa . San vicente do Mar, 2026.
         </div>
       </div>
-      <div>
-        <h4>¿Dónde nos reunimos?</h4>
-        <ul>
-          {STUDIO_LINKS.map(l => (
-            <li key={l.href}><a href={l.href}>{l.label}</a></li>
-          ))}
-        </ul>
-      </div>
-      <div>
+      <div className="foot-contact">
         <h4>Contacto</h4>
-        <ul>
-          {CONTACT.map(c => (
-            <li key={c.label}>
-              <a href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noopener">{c.label}</a>
-            </li>
-          ))}
-        </ul>
+        <CallButton eyebrow="Llámanos" />
+        <a className="foot-ig" href={CONTACT.instagramHref} target="_blank" rel="noopener">
+          {CONTACT.instagramLabel}
+        </a>
       </div>
       <div className="bottom">
         {BOTTOM.map(t => <span key={t}>{t}</span>)}

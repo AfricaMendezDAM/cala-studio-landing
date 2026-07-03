@@ -4,3 +4,7 @@ dist
 .DS_Store
 *.log
 *:Zone.Identifier
+.env
+.env.local
+supabase/.temp
+supabase/.branches

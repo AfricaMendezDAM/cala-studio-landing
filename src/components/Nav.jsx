@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import BrandMark from "./BrandMark.jsx";
 
 const LINKS = [
   { href: "#grupos",    label: "Grupos" },
@@ -19,13 +20,14 @@ export default function Nav() {
 
   return (
     <nav className={"nav" + (scrolled ? " scrolled" : "")}>
-      <a href="#top" className="brand">
-        calastudio
+      <a href="#top" className="brand" style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--ink)" }}>
+        <BrandMark size={22} className="brand-mark" />
+        cala.studio
       </a>
       <div className="links">
         {LINKS.map(l => <a key={l.href} href={l.href}>{l.label}</a>)}
       </div>
-      <a href="#reserva" className="cta"><span>Reservar</span></a>
+      <a href="#/reservar" className="cta"><span>Agenda tu clase</span></a>
     </nav>
   );
 }

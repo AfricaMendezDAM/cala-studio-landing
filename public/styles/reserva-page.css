@@ -1,0 +1,98 @@
+/* ── Página de reserva · split editorial "Frente al mar" ─────────────── */
+.reserva-page{
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 44fr 56fr;   /* la imagen equilibra: sin hueco a la derecha */
+  background: var(--bg);
+}
+
+/* Panel de imagen a sangre, altura completa */
+.rp-visual{
+  position: sticky; top: 0; height: 100dvh; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: clamp(28px, 4vw, 56px);
+}
+.rp-photo{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.rp-veil{
+  position: absolute; inset: 0;
+  background: linear-gradient(200deg, rgba(31,30,28,.12) 0%, rgba(31,30,28,.42) 55%, rgba(34,79,112,.58) 100%);
+}
+.rp-grain{
+  position: absolute; inset: 0; opacity: .06; mix-blend-mode: overlay; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.rp-visual > :not(.rp-photo):not(.rp-veil):not(.rp-grain){ position: relative; z-index: 1; }
+
+/* Cabecera: marca + volver */
+.rp-top{ display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.rp-brand{ display: flex; align-items: center; gap: 12px; }
+.rp-mark{ width: 34px; filter: brightness(0) invert(1); opacity: .92; }
+.rp-word{ color: #fff; font-size: 15px; letter-spacing: .18em; font-weight: 500; }
+.rp-word .d{ color: var(--yellow); }
+.rp-back{ color: rgba(255,255,255,.85); font-size: 10px; letter-spacing: .24em; text-transform: uppercase; font-weight: 600; transition: color .2s ease; }
+.rp-back:hover{ color: #fff; }
+
+/* Titular display — rotundo pero editorial */
+.rp-hero{ max-width: 15ch; }
+.rp-eyebrow{ display: block; color: rgba(255,255,255,.82); font-size: 11px; letter-spacing: .34em; text-transform: uppercase; font-weight: 600; margin-bottom: 18px; }
+.rp-title{ color: #fff; font-weight: 200; font-size: clamp(46px, 6.4vw, 92px); line-height: .92; letter-spacing: -.035em; }
+.rp-title em{ font-style: italic; font-weight: 400; color: var(--yellow); }
+.rp-lede{ margin-top: 22px; max-width: 34ch; color: rgba(255,255,255,.90); font-weight: 300; font-size: clamp(14px, 1.1vw, 17px); line-height: 1.6; }
+.rp-meta{ color: rgba(255,255,255,.90); font-size: 11px; letter-spacing: .28em; text-transform: uppercase; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+.rp-dot i{ display:block; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 0 4px rgba(217,182,90,.28); }
+
+/* ── Columna de reserva ──────────────────────────────────────────────── */
+.rp-panel{
+  display: flex; justify-content: center;
+  padding: clamp(28px, 3.5vw, 64px) clamp(20px, 3vw, 56px);
+  background: radial-gradient(120% 90% at 100% 0, var(--bg-2), var(--bg) 60%);
+}
+.rp-panel__in{ width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 16px; }
+
+/* Login: barra fina (píldora) sobre la tarjeta */
+.rp-login{ margin: 0; border-radius: 16px; padding: 14px 18px; box-shadow: 0 10px 24px -18px rgba(0,0,0,.25); }
+
+/* Tarjeta elevada + textura */
+.rp-card{
+  position: relative; overflow: hidden;
+  background: linear-gradient(180deg, var(--paper), var(--bg));
+  border: 1px solid var(--line-soft); border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+  padding: clamp(22px, 2.4vw, 34px);
+}
+.rp-card::before{
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: radial-gradient(rgba(31,30,28,.045) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+.rp-card__mark{ position: absolute; right: -26px; bottom: -22px; width: 180px; opacity: .05; pointer-events: none; }
+
+/* La tarjeta es estrecha → blindar anchos y compactar las filas del día */
+.rp-panel__in{ min-width: 0; }
+.rp-card .cal-layout{ position: relative; z-index: 1; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 28px; }
+.rp-card .cal, .rp-card .day-panel{ min-width: 0; }
+
+/* Fila de clase compacta: hora + nombre arriba, botón debajo a la derecha */
+.rp-card .dp-row{
+  grid-template-columns: 74px minmax(0, 1fr);
+  grid-template-areas: "time main" "act act";
+  gap: 8px 14px; padding: 18px 2px 18px 14px;
+}
+.rp-card .dp-time{ grid-area: time; }
+.rp-card .dp-time .t{ font-size: 24px; }
+.rp-card .dp-main{ grid-area: main; min-width: 0; }
+.rp-card .dp-main h4{ font-size: 18px; }
+.rp-card .dp-act{ grid-area: act; flex-direction: row; align-items: center; justify-content: flex-end; gap: 14px; padding-top: 4px; }
+
+.rp-fine{ text-align: center; color: var(--ink-mute); font-size: 11px; letter-spacing: .06em; }
+.rp-fine em{ font-style: italic; color: var(--blue); }
+
+/* ── Móvil ───────────────────────────────────────────────────────────── */
+@media (max-width: 900px){
+  .reserva-page{ grid-template-columns: 1fr; }
+  .rp-visual{ position: relative; height: auto; min-height: 54vh; }
+  .rp-hero{ max-width: none; }
+  .rp-card .cal-layout{ grid-template-columns: 1fr; gap: 22px; }
+  .rp-card .cal{ max-width: 420px; margin: 0 auto; }
+}
+@media (prefers-reduced-motion: reduce){ .rp-photo{ transition: none; } }

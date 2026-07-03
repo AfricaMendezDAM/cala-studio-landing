@@ -1,16 +1,32 @@
+import { useState, useEffect } from "react";
 import { useMobile } from "./hooks/useMobile.js";
 import Nav from "./components/Nav.jsx";
 import Hero from "./components/Hero.jsx";
 import Grupos from "./components/Grupos.jsx";
 import Tarifas from "./components/Tarifas.jsx";
 import EventosUbicacion from "./components/EventosUbicacion.jsx";
-import Reserva from "./components/Reserva.jsx";
+import Contacto from "./components/Contacto.jsx";
 import Footer from "./components/Footer.jsx";
+import ReservaPage from "./components/ReservaPage.jsx";
 import MobileTopBar from "./components/MobileTopBar.jsx";
 import MobileNav from "./components/MobileNav.jsx";
 
+function useHashRoute() {
+  const [hash, setHash] = useState(() => (typeof window !== "undefined" ? window.location.hash : ""));
+  useEffect(() => {
+    const on = () => setHash(window.location.hash);
+    window.addEventListener("hashchange", on);
+    return () => window.removeEventListener("hashchange", on);
+  }, []);
+  return hash;
+}
+
 export default function App() {
   const mobile = useMobile();
+  const hash = useHashRoute();
+
+  // Página de reserva dedicada (endpoint propio)
+  if (hash.startsWith("#/reservar")) return <ReservaPage />;
 
   if (mobile) {
     return (
@@ -21,7 +37,7 @@ export default function App() {
           <Grupos />
           <Tarifas />
           <EventosUbicacion />
-          <Reserva />
+          <Contacto />
           <Footer />
         </main>
         <MobileNav />
@@ -36,7 +52,7 @@ export default function App() {
       <Grupos />
       <Tarifas />
       <EventosUbicacion />
-      <Reserva />
+      <Contacto />
       <Footer />
     </>
   );

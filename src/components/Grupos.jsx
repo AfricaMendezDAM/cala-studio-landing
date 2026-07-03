@@ -4,7 +4,7 @@ import { GROUPS } from "../data.js";
 
 function GroupCard({ group, hidden }) {
   return (
-    <a href="#reserva" className={"group-card" + (hidden ? " mob-hidden" : "")}>
+    <a href="#/reservar" className={"group-card" + (hidden ? " mob-hidden" : "")}>
       <div className="head">
         <span className="num">{group.num}</span>
         <span className="tag">{group.tag}</span>

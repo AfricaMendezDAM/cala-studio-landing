@@ -58,8 +58,8 @@ export default function Hero() {
             Mat, sculpt y sesiones de amanecer frente al mar.
           </p>
           <div className="actions">
-            <a href="#reserva" className="btn btn-primary">
-              Reservar plaza <span className="arrow"></span>
+            <a href="#/reservar" className="btn btn-primary">
+              Agenda tu clase <span className="arrow"></span>
             </a>
             <a href="#grupos" className="btn btn-ghost">Ver horarios</a>
           </div>
