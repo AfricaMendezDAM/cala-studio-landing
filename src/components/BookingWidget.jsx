@@ -69,24 +69,38 @@ function DayItem({ c, now, busy, onReserve, onCancel }) {
 }
 
 function Account({ auth, nudge, accountRef }) {
-  const { user, loading, profile, profileComplete, signInWithEmail, saveProfile, signOut } = auth;
+  const { user, loading, profile, profileComplete, sendCode, verifyCode, saveProfile, signOut } = auth;
   const [email, setEmail]   = useState("");
+  const [code, setCode]     = useState("");
   const [sent, setSent]     = useState(false);
   const [nombre, setNombre] = useState(() => readDraft().nombre || "");
   const [tel, setTel]       = useState(() => readDraft().telefono || "");
   const [pending, setPending] = useState(false);
   const [err, setErr] = useState("");
 
-  const sendLink = async (e) => {
+  const send = async (e) => {
     e.preventDefault();
     if (!nombre.trim()) { setErr("Dinos tu nombre"); return; }
     if (tel.replace(/\D/g, "").length < 9) { setErr("Teléfono no válido"); return; }
     if (!/^\S+@\S+\.\S+$/.test(email)) { setErr("Email no válido"); return; }
     setErr(""); setPending(true);
     localStorage.setItem("cala_profile_draft", JSON.stringify({ nombre: nombre.trim(), telefono: tel.trim() }));
-    const { error } = await signInWithEmail(email.trim(), { nombre: nombre.trim(), telefono: tel.trim() });
+    const { error } = await sendCode(email.trim(), { nombre: nombre.trim(), telefono: tel.trim() });
     setPending(false);
     error ? setErr("No se pudo enviar, inténtalo de nuevo") : setSent(true);
+  };
+
+  const verify = async (e) => {
+    e.preventDefault();
+    if (code.trim().length < 6) { setErr("El código son 6 dígitos"); return; }
+    setErr(""); setPending(true);
+    const { error } = await verifyCode(email.trim(), code.trim());
+    if (error) { setPending(false); setErr("Código incorrecto o caducado"); return; }
+    // Sesión creada: guardamos el perfil con los datos ya tecleados (misma pantalla).
+    const { error: pErr } = await saveProfile({ nombre: nombre.trim(), telefono: tel.trim() });
+    setPending(false);
+    if (pErr) setErr(pErr.message || "Entraste, pero no se pudo guardar el perfil");
+    else localStorage.removeItem("cala_profile_draft");
   };
 
   const doSave = async () => {
@@ -116,18 +130,24 @@ function Account({ auth, nudge, accountRef }) {
     body = <span className="acc-loading">Conectando…</span>;
   } else if (!user) {
     body = sent ? (
-      <div className="acc-sent">
-        <span className="dot" />
+      <form className="acc-form" onSubmit={verify}>
         <div className="acc-copy">
           <span className="acc-ey">Revisa tu correo</span>
-          <span className="acc-tx">Te envié un enlace a <b>{email}</b><br />Ábrelo para entrar</span>
+          <span className="acc-tx">Te enviamos un código a <b>{email}</b><br />Escríbelo aquí para entrar</span>
         </div>
-      </div>
+        <div className="acc-row">
+          <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6}
+                 placeholder="Código de 6 dígitos" value={code}
+                 onChange={e => setCode(e.target.value.replace(/\D/g, ""))} />
+          <button className="b" disabled={pending}>{pending ? "Entrando…" : <>Entrar<span className="arw" /></>}</button>
+          <button type="button" className="acc-out" onClick={() => { setSent(false); setCode(""); setErr(""); }}>Cambiar datos</button>
+        </div>
+      </form>
     ) : (
-      <form className="acc-form" onSubmit={sendLink}>
+      <form className="acc-form" onSubmit={send}>
         <div className="acc-copy">
           <span className="acc-ey">Para reservar</span>
-          <span className="acc-tx">Déjanos tus datos y te enviamos un enlace — sin contraseñas</span>
+          <span className="acc-tx">Déjanos tus datos y te mandamos un código — sin contraseñas ni salir de aquí</span>
         </div>
         <div className="acc-row">
           <input type="text" placeholder="Nombre" value={nombre}
@@ -138,7 +158,7 @@ function Account({ auth, nudge, accountRef }) {
         <div className="acc-row">
           <input type="email" placeholder="tu@email.com" value={email}
                  onChange={e => setEmail(e.target.value)} autoComplete="email" />
-          <button className="b" disabled={pending}>{pending ? "Enviando…" : <>Enviar enlace<span className="arw" /></>}</button>
+          <button className="b" disabled={pending}>{pending ? "Enviando…" : <>Enviar código<span className="arw" /></>}</button>
         </div>
       </form>
     );
@@ -188,6 +208,7 @@ export default function BookingWidget() {
   const accountRef = useRef(null);
   const toastTimer = useRef(null);
   const pendingRan = useRef(false);
+  const didInitMonth = useRef(false);
 
   const flash = (msg) => {
     setToast(msg);
@@ -242,11 +263,14 @@ export default function BookingWidget() {
     return m;
   }, [classes]);
 
+  // Al cargar, sitúa el calendario en el primer mes con clases — SIN abrir
+  // ningún día. El desglose solo aparece al clicar una fecha.
   useEffect(() => {
-    if (!rows || selected) return;
+    if (!rows || didInitMonth.current) return;
+    didInitMonth.current = true;
     const fut = classes.filter(c => c.end.getTime() > now).sort((a, b) => a.start - b.start);
-    if (fut.length) { setSelected(fut[0].key); setViewMonth(firstOfMonth(fut[0].start)); }
-  }, [rows, classes, selected, now]);
+    if (fut.length) setViewMonth(firstOfMonth(fut[0].start));
+  }, [rows, classes, now]);
 
   const requireAuth = () => {
     accountRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });

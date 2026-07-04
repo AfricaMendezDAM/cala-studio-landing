@@ -27,23 +27,25 @@ export function useAuth() {
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
-  // El nombre/teléfono viajan como metadata: el trigger handle_new_user los
-  // vuelca al perfil, así el perfil ya llega completo al volver del enlace.
-  // Redirect a la raíz (no a #/reservar): con PKCE el ?code se corrompería tras
-  // el #. App.jsx salta a #/reservar al detectar el login con reserva pendiente.
-  const signInWithEmail = (email, { nombre, telefono } = {}) =>
+  // Identificación por CÓDIGO de 6 dígitos (no enlace): se teclea en la misma
+  // pantalla, sin salir de la web ni volver a rellenar nada. El nombre/teléfono
+  // viajan como metadata (el trigger los vuelca al perfil de usuarios nuevos).
+  const sendCode = (email, { nombre, telefono } = {}) =>
     supabase.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { nombre, telefono },
-      },
+      options: { data: { nombre, telefono }, shouldCreateUser: true },
     });
 
+  const verifyCode = (email, token) =>
+    supabase.auth.verifyOtp({ email, token, type: "email" });
+
   const saveProfile = async ({ nombre, telefono }) => {
-    if (!user) return { error: new Error("Sin sesión") };
+    // Coge el usuario del cliente (recién verificado), no del estado del hook,
+    // que puede no haberse propagado todavía tras verificar el código.
+    const { data: { user: u } } = await supabase.auth.getUser();
+    if (!u) return { error: new Error("Sin sesión") };
     const { error } = await supabase.from("profiles")
-      .upsert({ id: user.id, nombre, telefono });
+      .upsert({ id: u.id, nombre, telefono });
     if (!error) await loadProfile();
     return { error };
   };
@@ -54,5 +56,5 @@ export function useAuth() {
   const isAdmin = !!(profile && profile.is_admin);
 
   return { user, session, loading, profile, profileComplete, isAdmin,
-           signInWithEmail, saveProfile, signOut };
+           sendCode, verifyCode, saveProfile, signOut };
 }
