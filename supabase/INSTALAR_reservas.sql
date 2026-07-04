@@ -1,7 +1,6 @@
 -- cala.studio · INSTALACIÓN COMPLETA DE RESERVAS
 -- Abre ESTE archivo, selecciona todo (Ctrl+A), copia y pégalo en
--- Supabase → SQL Editor → Run. Es todo de una vez, en orden.
--- Es seguro re-ejecutarlo (idempotente).
+-- Supabase → SQL Editor → Run. Es seguro re-ejecutarlo (idempotente).
 
 -- cala.studio · Esquema de reservas (sessions) — FUENTE ÚNICA
 -- Reconcilia el esquema antiguo (classes/book_class de schema.sql) hacia el
@@ -43,6 +42,7 @@ create table if not exists public.class_sessions (
   starts_at   timestamptz not null,
   ends_at     timestamptz not null,
   capacity    smallint not null default 8,
+  reservadas  smallint not null default 0,                -- aforo manual (modelo WhatsApp)
   requires_entitlement boolean not null default false,    -- Fase 3 lo pone true en clases
   published   boolean not null default true,              -- borrador vs visible
   created_at  timestamptz not null default now(),
@@ -53,6 +53,8 @@ create table if not exists public.class_sessions (
   unique (class_slug, starts_at)   -- clases recurrentes idempotentes (NULLs no colisionan)
 );
 create index if not exists class_sessions_starts_at_idx on public.class_sessions (starts_at);
+-- por si la tabla ya existía sin la columna:
+alter table public.class_sessions add column if not exists reservadas smallint not null default 0;
 
 -- ── 3) Reservas (self-serve autenticado + invitado dado de alta por admin) ─
 create table if not exists public.bookings (
@@ -101,8 +103,10 @@ insert into public.class_types (slug, name, name_em, meta, duration_min, sort_or
 on conflict (slug) do nothing;
 -- cala.studio · Vista de disponibilidad, RPCs y RLS. Correr DESPUÉS de 0001.
 
--- ── Vista pública de disponibilidad (solo agregados, nunca identidades) ──
-create or replace view public.session_availability as
+-- ── Vista pública del horario (plazas por el contador manual `reservadas`) ──
+-- Modelo WhatsApp: el aforo lo lleva la dueña con la columna class_sessions.reservadas.
+drop view if exists public.session_availability;
+create view public.session_availability as
 select
   s.id                                as session_id,
   s.category,
@@ -118,14 +122,12 @@ select
   s.ends_at,
   s.capacity,
   s.requires_entitlement,
-  count(b.id) filter (where b.status = 'confirmed')                          as confirmed_count,
-  greatest(s.capacity - count(b.id) filter (where b.status = 'confirmed'), 0) as spots_left,
-  (count(b.id) filter (where b.status = 'confirmed') >= s.capacity)          as is_full
+  s.reservadas,
+  greatest(s.capacity - s.reservadas, 0) as spots_left,
+  (s.reservadas >= s.capacity)           as is_full
 from public.class_sessions s
 left join public.class_types ct on ct.slug = s.class_slug
-left join public.bookings    b  on b.session_id = s.id
-where s.published
-group by s.id, ct.slug;
+where s.published;
 
 grant select on public.session_availability to anon, authenticated;
 

@@ -17,13 +17,23 @@ const WA_NUMBER = CONTACT.phoneHref.replace(/\D/g, "");
 function DayItem({ c, now, dateLabel }) {
   const isEvent = c.kind === "event";
   const isPast  = c.start.getTime() < now;
+  const isFull  = c.free <= 0;
+  const isTight = !isFull && c.free <= 2;
   const nombre  = isEvent ? c.type.name : `${c.type.name} ${c.type.nameEm}`;
   const verbo   = isEvent ? "apuntarme a" : "reservar";
   const msg     = `Hola! Quiero ${verbo} ${nombre} el ${dateLabel} a las ${c.timeStart}`;
   const waHref  = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
 
+  let status;
+  if (isPast)      status = <span className="tag full">Finalizada</span>;
+  else if (isFull) status = <span className="tag full">Completo</span>;
+  else {
+    const txt = c.free === 1 ? "Queda 1 plaza" : `Quedan ${c.free} de ${c.capacity}`;
+    status = <span className={"tag " + (isTight ? "tight" : "open")}><span className="y" />{txt}</span>;
+  }
+
   return (
-    <div className={"dp-row" + (isEvent ? " is-event" : "") + (isPast ? " is-past" : "")}>
+    <div className={"dp-row" + (isEvent ? " is-event" : "") + (isTight ? " is-tight" : "") + (isFull ? " is-full" : "") + (isPast ? " is-past" : "")}>
       <div className="dp-time">
         <span className="t">{c.timeStart}</span>
         <span className="e">— {c.timeEnd} · {c.durationMin} min</span>
@@ -38,13 +48,13 @@ function DayItem({ c, now, dateLabel }) {
         ) : (
           <h4>{c.type.name} <em>{c.type.nameEm}</em></h4>
         )}
-        <span className="tag open">Aforo {c.capacity}</span>
+        {status}
       </div>
-      <div className="dp-act">
-        {isPast
-          ? <span className="tag full">Finalizada</span>
-          : <a className="b" href={waHref} target="_blank" rel="noopener">Reservar por WhatsApp</a>}
-      </div>
+      {!isPast && !isFull && (
+        <div className="dp-act">
+          <a className="b" href={waHref} target="_blank" rel="noopener">Reservar por WhatsApp</a>
+        </div>
+      )}
     </div>
   );
 }
@@ -78,7 +88,7 @@ export default function BookingWidget() {
         kind: r.category === "evento" ? "event" : "class",
         type: { name: r.name, nameEm: r.name_em, meta: r.meta },
         descripcion: r.descripcion,
-        capacity: r.capacity,
+        capacity: r.capacity, free: r.spots_left,
         start, end,
         durationMin: Math.round((end - start) / 60000),
         timeStart: `${pad(start.getHours())}:${pad(start.getMinutes())}`,

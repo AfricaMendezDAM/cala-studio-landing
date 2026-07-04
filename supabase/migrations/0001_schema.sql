@@ -38,6 +38,7 @@ create table if not exists public.class_sessions (
   starts_at   timestamptz not null,
   ends_at     timestamptz not null,
   capacity    smallint not null default 8,
+  reservadas  smallint not null default 0,                -- aforo manual (modelo WhatsApp)
   requires_entitlement boolean not null default false,    -- Fase 3 lo pone true en clases
   published   boolean not null default true,              -- borrador vs visible
   created_at  timestamptz not null default now(),
@@ -48,6 +49,8 @@ create table if not exists public.class_sessions (
   unique (class_slug, starts_at)   -- clases recurrentes idempotentes (NULLs no colisionan)
 );
 create index if not exists class_sessions_starts_at_idx on public.class_sessions (starts_at);
+-- por si la tabla ya existía sin la columna:
+alter table public.class_sessions add column if not exists reservadas smallint not null default 0;
 
 -- ── 3) Reservas (self-serve autenticado + invitado dado de alta por admin) ─
 create table if not exists public.bookings (

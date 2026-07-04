@@ -1,7 +1,9 @@
 -- cala.studio · Vista de disponibilidad, RPCs y RLS. Correr DESPUÉS de 0001.
 
--- ── Vista pública de disponibilidad (solo agregados, nunca identidades) ──
-create or replace view public.session_availability as
+-- ── Vista pública del horario (plazas por el contador manual `reservadas`) ──
+-- Modelo WhatsApp: el aforo lo lleva la dueña con la columna class_sessions.reservadas.
+drop view if exists public.session_availability;
+create view public.session_availability as
 select
   s.id                                as session_id,
   s.category,
@@ -17,14 +19,12 @@ select
   s.ends_at,
   s.capacity,
   s.requires_entitlement,
-  count(b.id) filter (where b.status = 'confirmed')                          as confirmed_count,
-  greatest(s.capacity - count(b.id) filter (where b.status = 'confirmed'), 0) as spots_left,
-  (count(b.id) filter (where b.status = 'confirmed') >= s.capacity)          as is_full
+  s.reservadas,
+  greatest(s.capacity - s.reservadas, 0) as spots_left,
+  (s.reservadas >= s.capacity)           as is_full
 from public.class_sessions s
 left join public.class_types ct on ct.slug = s.class_slug
-left join public.bookings    b  on b.session_id = s.id
-where s.published
-group by s.id, ct.slug;
+where s.published;
 
 grant select on public.session_availability to anon, authenticated;
 
