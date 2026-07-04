@@ -11,6 +11,10 @@ const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())
 const firstOfMonth = d => new Date(d.getFullYear(), d.getMonth(), 1);
 const addMonths = (d, n) => new Date(d.getFullYear(), d.getMonth() + n, 1);
 
+// Datos que la persona tecleó para pedir el enlace: se guardan para no volver
+// a pedírselos al regresar del correo (y auto-completar el perfil).
+const readDraft = () => { try { return JSON.parse(localStorage.getItem("cala_profile_draft") || "{}"); } catch { return {}; } };
+
 function DayItem({ c, now, busy, onReserve, onCancel }) {
   const { free, mine } = c;
   const isEvent = c.kind === "event";
@@ -68,8 +72,8 @@ function Account({ auth, nudge, accountRef }) {
   const { user, loading, profile, profileComplete, signInWithEmail, saveProfile, signOut } = auth;
   const [email, setEmail]   = useState("");
   const [sent, setSent]     = useState(false);
-  const [nombre, setNombre] = useState("");
-  const [tel, setTel]       = useState("");
+  const [nombre, setNombre] = useState(() => readDraft().nombre || "");
+  const [tel, setTel]       = useState(() => readDraft().telefono || "");
   const [pending, setPending] = useState(false);
   const [err, setErr] = useState("");
 
@@ -79,20 +83,33 @@ function Account({ auth, nudge, accountRef }) {
     if (tel.replace(/\D/g, "").length < 9) { setErr("Teléfono no válido"); return; }
     if (!/^\S+@\S+\.\S+$/.test(email)) { setErr("Email no válido"); return; }
     setErr(""); setPending(true);
+    localStorage.setItem("cala_profile_draft", JSON.stringify({ nombre: nombre.trim(), telefono: tel.trim() }));
     const { error } = await signInWithEmail(email.trim(), { nombre: nombre.trim(), telefono: tel.trim() });
     setPending(false);
     error ? setErr("No se pudo enviar, inténtalo de nuevo") : setSent(true);
   };
 
-  const save = async (e) => {
-    e.preventDefault();
+  const doSave = async () => {
     if (!nombre.trim()) { setErr("Dinos tu nombre"); return; }
     if (tel.replace(/\D/g, "").length < 9) { setErr("Teléfono no válido"); return; }
     setErr(""); setPending(true);
     const { error } = await saveProfile({ nombre: nombre.trim(), telefono: tel.trim() });
     setPending(false);
-    if (error) setErr("No se pudo guardar, inténtalo de nuevo");
+    if (error) setErr(error.message || "No se pudo guardar, inténtalo de nuevo");
+    else localStorage.removeItem("cala_profile_draft");
   };
+  const save = (e) => { e.preventDefault(); doSave(); };
+
+  // Al volver del enlace: si el perfil está incompleto pero ya tenemos los datos
+  // que tecleó, completarlo solo — sin volver a pedírselos.
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (autoRan.current || loading || !user || profileComplete) return;
+    if (nombre.trim() && tel.replace(/\D/g, "").length >= 9) {
+      autoRan.current = true;
+      doSave();
+    }
+  }, [loading, user, profileComplete]);
 
   let body;
   if (loading) {
@@ -347,17 +364,24 @@ export default function BookingWidget() {
               </div>
             </div>
 
-            <div className="day-panel">
-              {selDate ? (
-                <>
-                  <div className="dp-head">{DIA_LONG[selDate.getDay()]} <b>{selDate.getDate()} {MES_SHORT[selDate.getMonth()]}</b></div>
-                  {selClasses.length ? selClasses.map(c => (
-                    <DayItem key={c.id} c={c} now={now} busy={busy} onReserve={onReserve} onCancel={onCancel} />
-                  )) : <div className="dp-none">No hay nada este día</div>}
-                </>
-              ) : (
-                <div className="dp-none">Elige un día con clase o evento en el calendario</div>
-              )}
+            <div className={"day-panel" + (selDate ? " is-open" : "")}>
+              <div className="dp-inner">
+                {selDate && (
+                  <div className="dp-card">
+                    <div className="dp-head">
+                      <span className="dp-date">{DIA_LONG[selDate.getDay()]} <b>{selDate.getDate()} {MES_SHORT[selDate.getMonth()]}</b></span>
+                      <button className="dp-close" aria-label="Cerrar" onClick={() => setSelected(null)}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                      </button>
+                    </div>
+                    <div className="dp-list">
+                      {selClasses.length ? selClasses.map(c => (
+                        <DayItem key={c.id} c={c} now={now} busy={busy} onReserve={onReserve} onCancel={onCancel} />
+                      )) : <div className="dp-none">No hay nada este día</div>}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

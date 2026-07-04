@@ -1,6 +1,7 @@
 -- cala.studio · INSTALACIÓN COMPLETA DE RESERVAS
 -- Abre ESTE archivo, selecciona todo (Ctrl+A), copia y pégalo en
 -- Supabase → SQL Editor → Run. Es todo de una vez, en orden.
+-- Es seguro re-ejecutarlo (idempotente).
 
 -- cala.studio · Esquema de reservas (sessions) — FUENTE ÚNICA
 -- Reconcilia el esquema antiguo (classes/book_class de schema.sql) hacia el
@@ -248,21 +249,33 @@ drop policy if exists bookings_read on public.bookings;
 create policy bookings_read on public.bookings
   for select to authenticated using (user_id = auth.uid() or public.is_admin());
 
--- Perfiles: cada quien el suyo; admin lee todos. Nadie se hace admin a sí mismo.
+-- Perfiles: cada quien el suyo; admin lee todos.
+drop policy if exists profiles_self        on public.profiles;   -- policy antigua (schema.sql)
 drop policy if exists profiles_self_read   on public.profiles;
 drop policy if exists profiles_self_insert on public.profiles;
 drop policy if exists profiles_self_update on public.profiles;
 create policy profiles_self_read on public.profiles
   for select to authenticated using (id = auth.uid() or public.is_admin());
 create policy profiles_self_insert on public.profiles
-  for insert to authenticated
-  with check (id = auth.uid() and coalesce(is_admin, false) = false);
+  for insert to authenticated with check (id = auth.uid());
 create policy profiles_self_update on public.profiles
-  for update to authenticated using (id = auth.uid())
-  with check (
-    id = auth.uid()
-    and is_admin = (select p.is_admin from public.profiles p where p.id = auth.uid())
-  );
+  for update to authenticated using (id = auth.uid()) with check (id = auth.uid());
+
+-- El candado de is_admin va por trigger (robusto, no rompe el guardado del perfil):
+-- un usuario normal no puede ponerse/quitarse admin; el SQL editor (auth.uid NULL) sí.
+create or replace function public.freeze_is_admin()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is not null and not public.is_admin() then
+    new.is_admin := coalesce(
+      (select p.is_admin from public.profiles p where p.id = new.id), false);
+  end if;
+  return new;
+end; $$;
+drop trigger if exists profiles_freeze_admin on public.profiles;
+create trigger profiles_freeze_admin
+  before insert or update on public.profiles
+  for each row execute function public.freeze_is_admin();
 -- cala.studio · Genera las sesiones del calendario
 -- Martes y Jueves · Mat 9:00–9:50 · Sculpt 10:00–10:50 · aforo 8
 -- Desde HOY hasta el 31 ago 2026. Idempotente (re-ejecutable sin duplicar).
