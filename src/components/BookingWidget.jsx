@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../lib/supabase.js";
-import { useAuth } from "../hooks/useAuth.js";
+import { CONTACT } from "../data.js";
 
 const DOW       = ["L", "M", "X", "J", "V", "S", "D"];
 const MES_SHORT = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -11,42 +11,19 @@ const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())
 const firstOfMonth = d => new Date(d.getFullYear(), d.getMonth(), 1);
 const addMonths = (d, n) => new Date(d.getFullYear(), d.getMonth() + n, 1);
 
-// Datos que la persona tecleó para pedir el enlace: se guardan para no volver
-// a pedírselos al regresar del correo (y auto-completar el perfil).
-const readDraft = () => { try { return JSON.parse(localStorage.getItem("cala_profile_draft") || "{}"); } catch { return {}; } };
+// Número de WhatsApp (del teléfono de contacto, solo dígitos)
+const WA_NUMBER = CONTACT.phoneHref.replace(/\D/g, "");
 
-function DayItem({ c, now, busy, onReserve, onCancel }) {
-  const { free, mine } = c;
+function DayItem({ c, now, dateLabel }) {
   const isEvent = c.kind === "event";
-  const isFull  = free <= 0 && !mine;
-  const isTight = !isFull && !mine && free <= 2;
   const isPast  = c.start.getTime() < now;
-  const canCancel = (c.start.getTime() - now) / 36e5 >= 12;
-
-  const cls = "dp-row"
-    + (isEvent ? " is-event" : "")
-    + (mine ? " is-mine" : "") + (isTight ? " is-tight" : "")
-    + (isFull ? " is-full" : "") + (isPast ? " is-past" : "");
-
-  let status;
-  if (mine)         status = <span className="tag mine"><span className="ck">✓</span>{isEvent ? "Apuntada" : "Reservado"}</span>;
-  else if (isPast)  status = <span className="tag full">Finalizada</span>;
-  else if (isFull)  status = <span className="tag full">Completo</span>;
-  else {
-    const txt = free === 1 ? "Queda 1 plaza" : `Quedan ${free} plazas`;
-    status = <span className={"tag " + (isTight ? "tight" : "open")}><span className="y" />{txt}</span>;
-  }
-
-  let action;
-  if (isPast)      action = null;
-  else if (mine)   action = canCancel
-    ? <button className="cancel" disabled={busy} onClick={() => onCancel(c.bookingId)}>Cancelar</button>
-    : <span className="lock">Cancela hasta <em>12h antes</em></span>;
-  else if (isFull) action = null;
-  else             action = <button className="b" disabled={busy} onClick={() => onReserve(c.id)}>{isEvent ? "Apuntarme" : "Reservar"}<span className="arw" /></button>;
+  const nombre  = isEvent ? c.type.name : `${c.type.name} ${c.type.nameEm}`;
+  const verbo   = isEvent ? "apuntarme a" : "reservar";
+  const msg     = `Hola! Quiero ${verbo} ${nombre} el ${dateLabel} a las ${c.timeStart}`;
+  const waHref  = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
 
   return (
-    <div className={cls}>
+    <div className={"dp-row" + (isEvent ? " is-event" : "") + (isPast ? " is-past" : "")}>
       <div className="dp-time">
         <span className="t">{c.timeStart}</span>
         <span className="e">— {c.timeEnd} · {c.durationMin} min</span>
@@ -61,151 +38,29 @@ function DayItem({ c, now, busy, onReserve, onCancel }) {
         ) : (
           <h4>{c.type.name} <em>{c.type.nameEm}</em></h4>
         )}
-        {status}
+        <span className="tag open">Aforo {c.capacity}</span>
       </div>
-      {action && <div className="dp-act">{action}</div>}
-    </div>
-  );
-}
-
-function Account({ auth, nudge, accountRef }) {
-  const { user, loading, profile, profileComplete, signInWithEmail, saveProfile, signOut } = auth;
-  const [email, setEmail]   = useState(() => readDraft().email || "");
-  const [sent, setSent]     = useState(false);
-  const [nombre, setNombre] = useState(() => readDraft().nombre || "");
-  const [tel, setTel]       = useState(() => readDraft().telefono || "");
-  const [pending, setPending] = useState(false);
-  const [err, setErr] = useState("");
-
-  const send = async (e) => {
-    e.preventDefault();
-    if (!nombre.trim()) { setErr("Dinos tu nombre"); return; }
-    if (tel.replace(/\D/g, "").length < 9) { setErr("Teléfono no válido"); return; }
-    if (!/^\S+@\S+\.\S+$/.test(email)) { setErr("Email no válido"); return; }
-    setErr(""); setPending(true);
-    localStorage.setItem("cala_profile_draft", JSON.stringify({ nombre: nombre.trim(), telefono: tel.trim(), email: email.trim() }));
-    const { error } = await signInWithEmail(email.trim(), { nombre: nombre.trim(), telefono: tel.trim() });
-    setPending(false);
-    error ? setErr("No se pudo enviar, inténtalo de nuevo") : setSent(true);
-  };
-
-  const doSave = async () => {
-    if (!nombre.trim()) { setErr("Dinos tu nombre"); return; }
-    if (tel.replace(/\D/g, "").length < 9) { setErr("Teléfono no válido"); return; }
-    setErr(""); setPending(true);
-    const { error } = await saveProfile({ nombre: nombre.trim(), telefono: tel.trim() });
-    setPending(false);
-    if (error) setErr(error.message || "No se pudo guardar, inténtalo de nuevo");
-  };
-  const save = (e) => { e.preventDefault(); doSave(); };
-
-  // Al volver del enlace: si el perfil está incompleto pero ya tenemos los datos
-  // que tecleó, completarlo solo — sin volver a pedírselos.
-  const autoRan = useRef(false);
-  useEffect(() => {
-    if (autoRan.current || loading || !user || profileComplete) return;
-    if (nombre.trim() && tel.replace(/\D/g, "").length >= 9) {
-      autoRan.current = true;
-      doSave();
-    }
-  }, [loading, user, profileComplete]);
-
-  let body;
-  if (loading) {
-    body = <span className="acc-loading">Conectando…</span>;
-  } else if (!user) {
-    body = sent ? (
-      <div className="acc-sent">
-        <span className="dot" />
-        <div className="acc-copy">
-          <span className="acc-ey">Revisa tu correo</span>
-          <span className="acc-tx">Te enviamos un enlace a <b>{email}</b><br />Ábrelo y entrarás directamente al calendario</span>
-        </div>
-        <button type="button" className="acc-out" onClick={() => { setSent(false); setErr(""); }}>Usar otro email</button>
+      <div className="dp-act">
+        {isPast
+          ? <span className="tag full">Finalizada</span>
+          : <a className="b" href={waHref} target="_blank" rel="noopener">Reservar por WhatsApp</a>}
       </div>
-    ) : (
-      <form className="acc-form" onSubmit={send}>
-        <div className="acc-copy">
-          <span className="acc-ey">Para reservar</span>
-          <span className="acc-tx">Déjanos tus datos y te enviamos un enlace de acceso</span>
-        </div>
-        <div className="acc-row">
-          <input type="text" placeholder="Nombre" value={nombre}
-                 onChange={e => setNombre(e.target.value)} autoComplete="given-name" />
-          <input type="tel" placeholder="Teléfono" value={tel}
-                 onChange={e => setTel(e.target.value)} autoComplete="tel" />
-        </div>
-        <div className="acc-row">
-          <input type="email" placeholder="tu@email.com" value={email}
-                 onChange={e => setEmail(e.target.value)} autoComplete="email" />
-          <button className="b" disabled={pending}>{pending ? "Enviando…" : <>Enviar enlace<span className="arw" /></>}</button>
-        </div>
-      </form>
-    );
-  } else if (!profileComplete) {
-    body = (
-      <form className="acc-form" onSubmit={save}>
-        <div className="acc-copy">
-          <span className="acc-ey">Casi listo</span>
-          <span className="acc-tx">Completa tu perfil para reservar</span>
-        </div>
-        <div className="acc-row">
-          <input type="text" placeholder="Nombre" value={nombre} onChange={e => setNombre(e.target.value)} />
-          <input type="tel" placeholder="Teléfono" value={tel} onChange={e => setTel(e.target.value)} />
-          <button className="b" disabled={pending}>{pending ? "…" : <>Guardar<span className="arw" /></>}</button>
-          <button type="button" className="acc-out" onClick={signOut}>Salir</button>
-        </div>
-      </form>
-    );
-  } else {
-    body = (
-      <div className="acc-in">
-        <span className="acc-who"><span className="dot" />En sesión como <b>{profile.nombre}</b></span>
-        <button className="acc-out" onClick={signOut}>Salir</button>
-      </div>
-    );
-  }
-
-  return (
-    <div ref={accountRef} className={"ag-account rp-login" + (nudge ? " nudge" : "")}>
-      {body}
-      {err && <span className="acc-err">{err}</span>}
     </div>
   );
 }
 
 export default function BookingWidget() {
-  const auth = useAuth();
-  const { user } = auth;
   const now = Date.now();
 
-  const [rows, setRows]   = useState(null);
-  const [mine, setMine]   = useState(new Map());   // session_id → booking_id
-  const [busy, setBusy]   = useState(false);
-  const [toast, setToast] = useState("");
-  const [nudge, setNudge] = useState(false);
+  const [rows, setRows]           = useState(null);
   const [viewMonth, setViewMonth] = useState(() => firstOfMonth(new Date()));
   const [selected, setSelected]   = useState(null);
-  const accountRef = useRef(null);
-  const toastTimer = useRef(null);
-  const pendingRan = useRef(false);
   const didInitMonth = useRef(false);
 
-  const flash = (msg) => {
-    setToast(msg);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(""), 4000);
-  };
-
   const load = useCallback(async () => {
-    const [{ data: avail }, bk] = await Promise.all([
-      supabase.from("session_availability").select("*"),
-      user ? supabase.from("bookings").select("id, session_id").eq("status", "confirmed")
-           : Promise.resolve({ data: [] }),
-    ]);
-    setRows(avail ?? []);
-    setMine(new Map((bk.data ?? []).map(b => [b.session_id, b.id])));
-  }, [user]);
+    const { data } = await supabase.from("session_availability").select("*");
+    setRows(data ?? []);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
@@ -223,8 +78,7 @@ export default function BookingWidget() {
         kind: r.category === "evento" ? "event" : "class",
         type: { name: r.name, nameEm: r.name_em, meta: r.meta },
         descripcion: r.descripcion,
-        capacity: r.capacity, free: r.spots_left,
-        mine: mine.has(r.session_id), bookingId: mine.get(r.session_id),
+        capacity: r.capacity,
         start, end,
         durationMin: Math.round((end - start) / 60000),
         timeStart: `${pad(start.getHours())}:${pad(start.getMinutes())}`,
@@ -232,7 +86,7 @@ export default function BookingWidget() {
         key: ymd(start),
       };
     });
-  }, [rows, mine]);
+  }, [rows]);
 
   const byDay = useMemo(() => {
     const m = new Map();
@@ -253,47 +107,6 @@ export default function BookingWidget() {
     if (fut.length) setViewMonth(firstOfMonth(fut[0].start));
   }, [rows, classes, now]);
 
-  const requireAuth = () => {
-    accountRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    setNudge(true); setTimeout(() => setNudge(false), 1600);
-    flash("Déjanos tus datos arriba y confirmamos tu plaza");
-  };
-
-  const bookClass = async (id) => {
-    setBusy(true);
-    const { error } = await supabase.rpc("book_session", { p_session_id: id });
-    setBusy(false);
-    flash(error ? (/FULL/.test(error.message) ? "Se acaba de llenar 😕" : "No se pudo reservar, prueba otra vez") : "¡Plaza reservada! ✓");
-    load();
-  };
-
-  const onReserve = (id) => {
-    if (!user || !auth.profileComplete) {
-      localStorage.setItem("cala_pending_class", id);   // recordar la clase
-      return requireAuth();
-    }
-    return bookClass(id);
-  };
-
-  const onCancel = async (bookingId) => {
-    setBusy(true);
-    const { error } = await supabase.rpc("cancel_booking", { p_booking_id: bookingId });
-    setBusy(false);
-    flash(error ? "No se pudo cancelar" : "Reserva cancelada");
-    load();
-  };
-
-  // Al volver del enlace con sesión + perfil completo: auto-reservar la clase
-  // pendiente, sin tener que reclicar. El ref evita dispararlo dos veces.
-  useEffect(() => {
-    if (!user || !auth.profileComplete || !rows) return;
-    const pid = localStorage.getItem("cala_pending_class");
-    if (!pid || pendingRan.current) return;
-    pendingRan.current = true;
-    localStorage.removeItem("cala_pending_class");
-    bookClass(pid);
-  }, [user, auth.profileComplete, rows]);
-
   const cells = useMemo(() => {
     const start = firstOfMonth(viewMonth);
     const offset = (start.getDay() + 6) % 7;
@@ -310,7 +123,6 @@ export default function BookingWidget() {
         d, key,
         hasClass: dayClasses.some(c => c.kind === "class"),
         hasEvent: dayClasses.some(c => c.kind === "event"),
-        hasMine: dayClasses.some(c => c.mine),
         selectable: dayClasses.some(c => c.end.getTime() > now),
         isToday: key === todayKey,
         isPast: date < todayMid,
@@ -321,11 +133,12 @@ export default function BookingWidget() {
 
   const selDate = selected ? new Date(selected + "T00:00:00") : null;
   const selClasses = selected ? (byDay.get(selected) || []) : [];
+  const dateLabel = selDate
+    ? `${DIA_LONG[selDate.getDay()].toLowerCase()} ${selDate.getDate()} de ${MES_LONG[selDate.getMonth()].toLowerCase()}`
+    : "";
 
   return (
     <>
-      <Account auth={auth} nudge={nudge} accountRef={accountRef} />
-
       <div className="rp-card">
         <img className="rp-card__mark" src="assets/cala-isotipo.svg" alt="" aria-hidden="true" />
         {rows === null ? (
@@ -353,7 +166,6 @@ export default function BookingWidget() {
                       key={c.key}
                       className={"cal-cell"
                         + (c.hasClass ? " has-class" : "") + (c.hasEvent ? " has-event" : "")
-                        + (c.hasMine ? " has-mine" : "")
                         + (c.selectable ? " selectable" : "")
                         + (c.isToday ? " is-today" : "") + (c.isPast ? " is-past" : "")
                         + (c.key === selected ? " is-selected" : "")}
@@ -383,7 +195,7 @@ export default function BookingWidget() {
                     </div>
                     <div className="dp-list">
                       {selClasses.length ? selClasses.map(c => (
-                        <DayItem key={c.id} c={c} now={now} busy={busy} onReserve={onReserve} onCancel={onCancel} />
+                        <DayItem key={c.id} c={c} now={now} dateLabel={dateLabel} />
                       )) : <div className="dp-none">No hay nada este día</div>}
                     </div>
                   </div>
@@ -394,11 +206,7 @@ export default function BookingWidget() {
         )}
       </div>
 
-      <p className="rp-fine">Reservar solo aparta tu hueco<br />Cancela hasta <em>12&nbsp;h antes</em></p>
-
-      <div className={"ag-toast" + (toast ? " show" : "")}>
-        <span className="y" />{toast}
-      </div>
+      <p className="rp-fine">Reservar te lleva a WhatsApp<br />Te confirmamos tu plaza al momento</p>
     </>
   );
 }
