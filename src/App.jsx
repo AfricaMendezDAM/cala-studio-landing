@@ -8,6 +8,7 @@ import EventosUbicacion from "./components/EventosUbicacion.jsx";
 import Contacto from "./components/Contacto.jsx";
 import Footer from "./components/Footer.jsx";
 import ReservaPage from "./components/ReservaPage.jsx";
+import GestionPage from "./components/GestionPage.jsx";
 import MobileTopBar from "./components/MobileTopBar.jsx";
 import MobileNav from "./components/MobileNav.jsx";
 
@@ -27,6 +28,8 @@ export default function App() {
 
   // Página de reserva dedicada (endpoint propio)
   if (hash.startsWith("#/reservar")) return <ReservaPage />;
+  // Panel privado de gestión de aforo
+  if (hash.startsWith("#/gestion")) return <GestionPage />;
 
   if (mobile) {
     return (
