@@ -173,6 +173,7 @@ function Account({ auth, nudge, accountRef }) {
           <input type="text" placeholder="Nombre" value={nombre} onChange={e => setNombre(e.target.value)} />
           <input type="tel" placeholder="Teléfono" value={tel} onChange={e => setTel(e.target.value)} />
           <button className="b" disabled={pending}>{pending ? "…" : <>Guardar<span className="arw" /></>}</button>
+          <button type="button" className="acc-out" onClick={signOut}>Salir</button>
         </div>
       </form>
     );
