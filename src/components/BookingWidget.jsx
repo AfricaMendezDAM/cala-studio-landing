@@ -11,19 +11,21 @@ const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())
 const firstOfMonth = d => new Date(d.getFullYear(), d.getMonth(), 1);
 const addMonths = (d, n) => new Date(d.getFullYear(), d.getMonth() + n, 1);
 
-function DayClass({ c, now, busy, onReserve, onCancel }) {
-  const { capacity, free, mine } = c;
+function DayItem({ c, now, busy, onReserve, onCancel }) {
+  const { free, mine } = c;
+  const isEvent = c.kind === "event";
   const isFull  = free <= 0 && !mine;
   const isTight = !isFull && !mine && free <= 2;
   const isPast  = c.start.getTime() < now;
   const canCancel = (c.start.getTime() - now) / 36e5 >= 12;
 
   const cls = "dp-row"
+    + (isEvent ? " is-event" : "")
     + (mine ? " is-mine" : "") + (isTight ? " is-tight" : "")
     + (isFull ? " is-full" : "") + (isPast ? " is-past" : "");
 
   let status;
-  if (mine)         status = <span className="tag mine"><span className="ck">✓</span>Reservado</span>;
+  if (mine)         status = <span className="tag mine"><span className="ck">✓</span>{isEvent ? "Apuntada" : "Reservado"}</span>;
   else if (isPast)  status = <span className="tag full">Finalizada</span>;
   else if (isFull)  status = <span className="tag full">Completo</span>;
   else {
@@ -37,16 +39,24 @@ function DayClass({ c, now, busy, onReserve, onCancel }) {
     ? <button className="cancel" disabled={busy} onClick={() => onCancel(c.bookingId)}>Cancelar</button>
     : <span className="lock">Cancela hasta <em>12h antes</em></span>;
   else if (isFull) action = null;
-  else             action = <button className="b" disabled={busy} onClick={() => onReserve(c.id)}>Reservar<span className="arw" /></button>;
+  else             action = <button className="b" disabled={busy} onClick={() => onReserve(c.id)}>{isEvent ? "Apuntarme" : "Reservar"}<span className="arw" /></button>;
 
   return (
     <div className={cls}>
       <div className="dp-time">
         <span className="t">{c.timeStart}</span>
-        <span className="e">— {c.timeEnd} · 50 min</span>
+        <span className="e">— {c.timeEnd} · {c.durationMin} min</span>
       </div>
       <div className="dp-main">
-        <h4>{c.type.name} <em>{c.type.nameEm}</em></h4>
+        {isEvent ? (
+          <>
+            <span className="dp-kind">Evento</span>
+            <h4>{c.type.name}</h4>
+            {c.descripcion && <p className="dp-desc">{c.descripcion}</p>}
+          </>
+        ) : (
+          <h4>{c.type.name} <em>{c.type.nameEm}</em></h4>
+        )}
         {status}
       </div>
       {action && <div className="dp-act">{action}</div>}
@@ -191,10 +201,13 @@ export default function BookingWidget() {
       const start = new Date(r.starts_at), end = new Date(r.ends_at);
       return {
         id: r.session_id,
+        kind: r.category === "evento" ? "event" : "class",
         type: { name: r.name, nameEm: r.name_em, meta: r.meta },
+        descripcion: r.descripcion,
         capacity: r.capacity, free: r.spots_left,
         mine: mine.has(r.session_id), bookingId: mine.get(r.session_id),
         start, end,
+        durationMin: Math.round((end - start) / 60000),
         timeStart: `${pad(start.getHours())}:${pad(start.getMinutes())}`,
         timeEnd: `${pad(end.getHours())}:${pad(end.getMinutes())}`,
         key: ymd(start),
@@ -273,7 +286,8 @@ export default function BookingWidget() {
       const dayClasses = byDay.get(key) || [];
       out.push({
         d, key,
-        hasClass: dayClasses.length > 0,
+        hasClass: dayClasses.some(c => c.kind === "class"),
+        hasEvent: dayClasses.some(c => c.kind === "event"),
         selectable: dayClasses.some(c => c.end.getTime() > now),
         isToday: key === todayKey,
         isPast: date < todayMid,
@@ -315,14 +329,18 @@ export default function BookingWidget() {
                     <button
                       key={c.key}
                       className={"cal-cell"
-                        + (c.hasClass ? " has-class" : "") + (c.selectable ? " selectable" : "")
+                        + (c.hasClass ? " has-class" : "") + (c.hasEvent ? " has-event" : "")
+                        + (c.selectable ? " selectable" : "")
                         + (c.isToday ? " is-today" : "") + (c.isPast ? " is-past" : "")
                         + (c.key === selected ? " is-selected" : "")}
                       disabled={!c.selectable}
                       onClick={() => c.selectable && setSelected(c.key)}
                     >
                       <span className="dn">{c.d}</span>
-                      <span className="mk" />
+                      <span className="cal-marks">
+                        {c.hasClass && <span className="mk mk-class" />}
+                        {c.hasEvent && <span className="mk mk-event" />}
+                      </span>
                     </button>
                   )
                 )}
@@ -334,11 +352,11 @@ export default function BookingWidget() {
                 <>
                   <div className="dp-head">{DIA_LONG[selDate.getDay()]} <b>{selDate.getDate()} {MES_SHORT[selDate.getMonth()]}</b></div>
                   {selClasses.length ? selClasses.map(c => (
-                    <DayClass key={c.id} c={c} now={now} busy={busy} onReserve={onReserve} onCancel={onCancel} />
-                  )) : <div className="dp-none">No hay clases este día</div>}
+                    <DayItem key={c.id} c={c} now={now} busy={busy} onReserve={onReserve} onCancel={onCancel} />
+                  )) : <div className="dp-none">No hay nada este día</div>}
                 </>
               ) : (
-                <div className="dp-none">Elige un día con clase en el calendario</div>
+                <div className="dp-none">Elige un día con clase o evento en el calendario</div>
               )}
             </div>
           </div>

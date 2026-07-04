@@ -74,12 +74,14 @@
   font-size: 14px; font-variant-numeric: tabular-nums; color: var(--ink-mute);
   transition: background .2s ease, color .2s ease, box-shadow .2s ease;
 }
+.cal-cell .cal-marks{ display:flex; gap:3px; height:5px; align-items:center; justify-content:center; }
 .cal-cell .mk{ width: 5px; height: 5px; border-radius:50%; background:transparent; }
 
-/* día con clase (reservable) */
+/* día con clase (amarillo) / evento (azul) — reservable */
 .cal-cell.selectable{ cursor:pointer; }
 .cal-cell.selectable .dn{ color: var(--ink); font-weight:500; }
-.cal-cell.selectable .mk{ background: var(--yellow); box-shadow: 0 0 0 2px rgba(217,182,90,.25); }
+.cal-cell.selectable .mk-class{ background: var(--yellow); box-shadow: 0 0 0 2px rgba(217,182,90,.25); }
+.cal-cell.selectable .mk-event{ background: var(--blue);   box-shadow: 0 0 0 2px rgba(47,107,150,.20); }
 .cal-cell.selectable:hover .dn{ background: var(--bg-2); }
 
 /* hoy */
@@ -87,11 +89,12 @@
 
 /* pasado */
 .cal-cell.is-past{ opacity:.4; }
-.cal-cell.is-past.has-class .mk{ background: var(--ink-mute); box-shadow:none; }
+.cal-cell.is-past .mk-class, .cal-cell.is-past .mk-event{ background: var(--ink-mute); box-shadow:none; }
 
 /* seleccionado */
 .cal-cell.is-selected .dn{ background: var(--ink); color:#fff; box-shadow:none; }
-.cal-cell.is-selected .mk{ background: var(--yellow); box-shadow:none; }
+.cal-cell.is-selected .mk-class{ background: var(--yellow); box-shadow:none; }
+.cal-cell.is-selected .mk-event{ background: var(--blue);   box-shadow:none; }
 
 /* ── Panel del día seleccionado ───────────────────────────────────────── */
 .day-panel{ min-height: 200px; }
@@ -113,7 +116,12 @@
 }
 .dp-row.is-mine::before{ background: var(--blue); }
 .dp-row.is-tight::before{ background: var(--yellow); }
+.dp-row.is-event::before{ background: var(--blue); }
 .dp-row.is-past{ opacity:.5; }
+
+/* eventos en el panel del día */
+.dp-kind{ font-size: 8.5px; letter-spacing:.24em; text-transform:uppercase; font-weight:700; color: var(--blue); }
+.dp-desc{ margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--ink-soft); max-width: 46ch; }
 
 .dp-time{ display:flex; flex-direction:column; gap: 4px; }
 .dp-time .t{ font-weight:200; font-size: 28px; line-height:.95; letter-spacing:-.03em; color: var(--ink); font-variant-numeric: tabular-nums; }
