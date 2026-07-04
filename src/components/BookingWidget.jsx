@@ -70,7 +70,7 @@ function DayItem({ c, now, busy, onReserve, onCancel }) {
 
 function Account({ auth, nudge, accountRef }) {
   const { user, loading, profile, profileComplete, sendCode, verifyCode, saveProfile, signOut } = auth;
-  const [email, setEmail]   = useState("");
+  const [email, setEmail]   = useState(() => readDraft().email || "");
   const [code, setCode]     = useState("");
   const [sent, setSent]     = useState(false);
   const [nombre, setNombre] = useState(() => readDraft().nombre || "");
@@ -84,7 +84,7 @@ function Account({ auth, nudge, accountRef }) {
     if (tel.replace(/\D/g, "").length < 9) { setErr("Teléfono no válido"); return; }
     if (!/^\S+@\S+\.\S+$/.test(email)) { setErr("Email no válido"); return; }
     setErr(""); setPending(true);
-    localStorage.setItem("cala_profile_draft", JSON.stringify({ nombre: nombre.trim(), telefono: tel.trim() }));
+    localStorage.setItem("cala_profile_draft", JSON.stringify({ nombre: nombre.trim(), telefono: tel.trim(), email: email.trim() }));
     const { error } = await sendCode(email.trim(), { nombre: nombre.trim(), telefono: tel.trim() });
     setPending(false);
     error ? setErr("No se pudo enviar, inténtalo de nuevo") : setSent(true);
@@ -100,7 +100,6 @@ function Account({ auth, nudge, accountRef }) {
     const { error: pErr } = await saveProfile({ nombre: nombre.trim(), telefono: tel.trim() });
     setPending(false);
     if (pErr) setErr(pErr.message || "Entraste, pero no se pudo guardar el perfil");
-    else localStorage.removeItem("cala_profile_draft");
   };
 
   const doSave = async () => {
@@ -110,7 +109,6 @@ function Account({ auth, nudge, accountRef }) {
     const { error } = await saveProfile({ nombre: nombre.trim(), telefono: tel.trim() });
     setPending(false);
     if (error) setErr(error.message || "No se pudo guardar, inténtalo de nuevo");
-    else localStorage.removeItem("cala_profile_draft");
   };
   const save = (e) => { e.preventDefault(); doSave(); };
 
@@ -133,7 +131,7 @@ function Account({ auth, nudge, accountRef }) {
       <form className="acc-form" onSubmit={verify}>
         <div className="acc-copy">
           <span className="acc-ey">Revisa tu correo</span>
-          <span className="acc-tx">Te enviamos un código a <b>{email}</b><br />Escríbelo aquí para entrar</span>
+          <span className="acc-tx">Escribe aquí el código que te mandamos a <b>{email}</b><br />o abre el enlace del correo y te lleva de vuelta ya dentro</span>
         </div>
         <div className="acc-row">
           <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6}

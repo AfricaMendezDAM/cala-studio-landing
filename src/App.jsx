@@ -30,9 +30,9 @@ export default function App() {
   // pendiente saltamos al calendario para auto-confirmarla — sin reclic.
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session
-          && localStorage.getItem("cala_pending_class")
-          && !window.location.hash.startsWith("#/reservar")) {
+      // Al iniciar sesión (incluido abrir el enlace del correo, que aterriza en
+      // la home), llevamos al calendario ya identificada.
+      if (event === "SIGNED_IN" && session && !window.location.hash.startsWith("#/reservar")) {
         window.location.hash = "#/reservar";
       }
     });
