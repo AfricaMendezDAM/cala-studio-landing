@@ -276,6 +276,14 @@ drop trigger if exists profiles_freeze_admin on public.profiles;
 create trigger profiles_freeze_admin
   before insert or update on public.profiles
   for each row execute function public.freeze_is_admin();
+
+-- ── Permisos de TABLA ────────────────────────────────────────────────────
+-- La RLS filtra las FILAS, pero hace falta el GRANT base a la tabla o da
+-- "permission denied for table ...". Supabase no siempre lo concede solo al
+-- crear tablas por SQL. Las escrituras de bookings van por RPC (definer).
+grant select on public.class_types, public.class_sessions to anon, authenticated;
+grant select, insert, update on public.profiles to authenticated;
+grant select on public.bookings to authenticated;
 -- cala.studio · Genera las sesiones del calendario
 -- Martes y Jueves · Mat 9:00–9:50 · Sculpt 10:00–10:50 · aforo 8
 -- Desde HOY hasta el 31 ago 2026. Idempotente (re-ejecutable sin duplicar).
