@@ -6,11 +6,6 @@ const DOW       = ["L", "M", "X", "J", "V", "S", "D"];
 const MES_SHORT = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 const MES_LONG  = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 const DIA_LONG  = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-const TYPE = {
-  mat:    { name: "Pilates", nameEm: "Mat",    meta: "Suelo · Todos los niveles" },
-  sculpt: { name: "Pilates", nameEm: "Sculpt", meta: "Resistencia · Todos los niveles" },
-};
-
 const pad = n => String(n).padStart(2, "0");
 const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const firstOfMonth = d => new Date(d.getFullYear(), d.getMonth(), 1);
@@ -39,7 +34,7 @@ function DayClass({ c, now, busy, onReserve, onCancel }) {
   let action;
   if (isPast)      action = null;
   else if (mine)   action = canCancel
-    ? <button className="cancel" disabled={busy} onClick={() => onCancel(c.id)}>Cancelar</button>
+    ? <button className="cancel" disabled={busy} onClick={() => onCancel(c.bookingId)}>Cancelar</button>
     : <span className="lock">Cancela hasta <em>12h antes</em></span>;
   else if (isFull) action = null;
   else             action = <button className="b" disabled={busy} onClick={() => onReserve(c.id)}>Reservar<span className="arw" /></button>;
@@ -70,9 +65,11 @@ function Account({ auth, nudge, accountRef }) {
 
   const sendLink = async (e) => {
     e.preventDefault();
+    if (!nombre.trim()) { setErr("Dinos tu nombre"); return; }
+    if (tel.replace(/\D/g, "").length < 9) { setErr("Teléfono no válido"); return; }
     if (!/^\S+@\S+\.\S+$/.test(email)) { setErr("Email no válido"); return; }
     setErr(""); setPending(true);
-    const { error } = await signInWithEmail(email.trim());
+    const { error } = await signInWithEmail(email.trim(), { nombre: nombre.trim(), telefono: tel.trim() });
     setPending(false);
     error ? setErr("No se pudo enviar, inténtalo de nuevo") : setSent(true);
   };
@@ -103,7 +100,13 @@ function Account({ auth, nudge, accountRef }) {
       <form className="acc-form" onSubmit={sendLink}>
         <div className="acc-copy">
           <span className="acc-ey">Para reservar</span>
-          <span className="acc-tx">Identifícate con tu email — sin contraseñas</span>
+          <span className="acc-tx">Déjanos tus datos y te enviamos un enlace — sin contraseñas</span>
+        </div>
+        <div className="acc-row">
+          <input type="text" placeholder="Nombre" value={nombre}
+                 onChange={e => setNombre(e.target.value)} autoComplete="given-name" />
+          <input type="tel" placeholder="Teléfono" value={tel}
+                 onChange={e => setTel(e.target.value)} autoComplete="tel" />
         </div>
         <div className="acc-row">
           <input type="email" placeholder="tu@email.com" value={email}
@@ -149,7 +152,7 @@ export default function BookingWidget() {
   const now = Date.now();
 
   const [rows, setRows]   = useState(null);
-  const [mine, setMine]   = useState(new Set());
+  const [mine, setMine]   = useState(new Map());   // session_id → booking_id
   const [busy, setBusy]   = useState(false);
   const [toast, setToast] = useState("");
   const [nudge, setNudge] = useState(false);
@@ -157,6 +160,7 @@ export default function BookingWidget() {
   const [selected, setSelected]   = useState(null);
   const accountRef = useRef(null);
   const toastTimer = useRef(null);
+  const pendingRan = useRef(false);
 
   const flash = (msg) => {
     setToast(msg);
@@ -166,11 +170,12 @@ export default function BookingWidget() {
 
   const load = useCallback(async () => {
     const [{ data: avail }, bk] = await Promise.all([
-      supabase.rpc("availability"),
-      user ? supabase.from("bookings").select("class_id") : Promise.resolve({ data: [] }),
+      supabase.from("session_availability").select("*"),
+      user ? supabase.from("bookings").select("id, session_id").eq("status", "confirmed")
+           : Promise.resolve({ data: [] }),
     ]);
     setRows(avail ?? []);
-    setMine(new Set((bk.data ?? []).map(b => b.class_id)));
+    setMine(new Map((bk.data ?? []).map(b => [b.session_id, b.id])));
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
@@ -185,8 +190,10 @@ export default function BookingWidget() {
     return rows.map(r => {
       const start = new Date(r.starts_at), end = new Date(r.ends_at);
       return {
-        id: r.class_id, type: TYPE[r.tipo] ?? { name: "Pilates", nameEm: "", meta: "" },
-        capacity: r.capacity, free: r.free, mine: mine.has(r.class_id),
+        id: r.session_id,
+        type: { name: r.name, nameEm: r.name_em, meta: r.meta },
+        capacity: r.capacity, free: r.spots_left,
+        mine: mine.has(r.session_id), bookingId: mine.get(r.session_id),
         start, end,
         timeStart: `${pad(start.getHours())}:${pad(start.getMinutes())}`,
         timeEnd: `${pad(end.getHours())}:${pad(end.getMinutes())}`,
@@ -214,25 +221,43 @@ export default function BookingWidget() {
   const requireAuth = () => {
     accountRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     setNudge(true); setTimeout(() => setNudge(false), 1600);
-    flash("Identifícate arriba para reservar tu plaza");
+    flash("Déjanos tus datos arriba y confirmamos tu plaza");
   };
 
-  const onReserve = async (id) => {
-    if (!user || !auth.profileComplete) return requireAuth();
+  const bookClass = async (id) => {
     setBusy(true);
-    const { error } = await supabase.rpc("book_class", { _class_id: id });
+    const { error } = await supabase.rpc("book_session", { p_session_id: id });
     setBusy(false);
     flash(error ? (/FULL/.test(error.message) ? "Se acaba de llenar 😕" : "No se pudo reservar, prueba otra vez") : "¡Plaza reservada! ✓");
     load();
   };
 
-  const onCancel = async (id) => {
+  const onReserve = (id) => {
+    if (!user || !auth.profileComplete) {
+      localStorage.setItem("cala_pending_class", id);   // recordar la clase
+      return requireAuth();
+    }
+    return bookClass(id);
+  };
+
+  const onCancel = async (bookingId) => {
     setBusy(true);
-    const { error } = await supabase.from("bookings").delete().eq("class_id", id);
+    const { error } = await supabase.rpc("cancel_booking", { p_booking_id: bookingId });
     setBusy(false);
     flash(error ? "No se pudo cancelar" : "Reserva cancelada");
     load();
   };
+
+  // Al volver del enlace con sesión + perfil completo: auto-reservar la clase
+  // pendiente, sin tener que reclicar. El ref evita dispararlo dos veces.
+  useEffect(() => {
+    if (!user || !auth.profileComplete || !rows) return;
+    const pid = localStorage.getItem("cala_pending_class");
+    if (!pid || pendingRan.current) return;
+    pendingRan.current = true;
+    localStorage.removeItem("cala_pending_class");
+    bookClass(pid);
+  }, [user, auth.profileComplete, rows]);
 
   const cells = useMemo(() => {
     const start = firstOfMonth(viewMonth);

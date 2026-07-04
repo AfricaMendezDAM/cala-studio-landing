@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase } from "./lib/supabase.js";
 import { useMobile } from "./hooks/useMobile.js";
 import Nav from "./components/Nav.jsx";
 import Hero from "./components/Hero.jsx";
@@ -24,6 +25,19 @@ function useHashRoute() {
 export default function App() {
   const mobile = useMobile();
   const hash = useHashRoute();
+
+  // Al volver del magic-link (aterriza en la raíz), si había una reserva
+  // pendiente saltamos al calendario para auto-confirmarla — sin reclic.
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session
+          && localStorage.getItem("cala_pending_class")
+          && !window.location.hash.startsWith("#/reservar")) {
+        window.location.hash = "#/reservar";
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   // Página de reserva dedicada (endpoint propio)
   if (hash.startsWith("#/reservar")) return <ReservaPage />;

@@ -1,117 +1,128 @@
--- cala.studio · Vista de disponibilidad, RPCs de reserva/cancelación y RLS
--- Ejecutar DESPUÉS de 0001_schema.sql.
+-- cala.studio · Vista de disponibilidad, RPCs y RLS. Correr DESPUÉS de 0001.
 
 -- ── Vista pública de disponibilidad (solo agregados, nunca identidades) ──
--- Owner = postgres → agrega sobre bookings saltándose RLS, pero SOLO expone
--- conteos; nombres/emails/teléfonos nunca salen de la BD.
 create or replace view public.session_availability as
 select
-  s.id            as session_id,
+  s.id                                as session_id,
+  s.category,
   s.class_slug,
-  ct.name,
-  ct.name_em,
-  ct.meta,
-  ct.duration_min,
+  coalesce(ct.name,    s.titulo)      as name,
+  coalesce(ct.name_em, '')            as name_em,
+  coalesce(ct.meta,    s.descripcion) as meta,
+  s.titulo,
+  s.descripcion,
+  coalesce(ct.duration_min,
+           (extract(epoch from (s.ends_at - s.starts_at)) / 60)::int) as duration_min,
   s.starts_at,
   s.ends_at,
   s.capacity,
+  s.requires_entitlement,
   count(b.id) filter (where b.status = 'confirmed')                          as confirmed_count,
   greatest(s.capacity - count(b.id) filter (where b.status = 'confirmed'), 0) as spots_left,
   (count(b.id) filter (where b.status = 'confirmed') >= s.capacity)          as is_full
 from public.class_sessions s
-join public.class_types ct on ct.slug = s.class_slug
-left join public.bookings b on b.session_id = s.id
+left join public.class_types ct on ct.slug = s.class_slug
+left join public.bookings    b  on b.session_id = s.id
+where s.published
 group by s.id, ct.slug;
 
--- ── RPC: reservar con aforo atómico ─────────────────────────────────────
+grant select on public.session_availability to anon, authenticated;
+
+-- ── RPC: reservar (self-serve, aforo atómico) ───────────────────────────
+-- La identidad SIEMPRE se deriva de la cuenta (nunca del cliente) → cierra el
+-- vector de spam (no se puede reservar poniendo el email de otra persona).
 create or replace function public.book_session(
   p_session_id uuid,
-  p_nombre     text,
-  p_email      text,
-  p_telefono   text,
   p_message    text default null
-) returns table (booking_id uuid, status text, spots_left int)
-language plpgsql
-security definer
-set search_path = public
-as $$
+) returns table (booking_id uuid, spots_left int)
+language plpgsql security definer set search_path = public as $$
 declare
-  v_capacity  int;
-  v_confirmed int;
-  v_status    text;
-  v_starts    timestamptz;
-  v_id        uuid;
+  v_cap int; v_conf int; v_starts timestamptz; v_req boolean;
+  v_email text; v_nombre text; v_tel text; v_id uuid;
 begin
-  if coalesce(trim(p_nombre),   '') = ''
-     or coalesce(trim(p_email),    '') = ''
-     or coalesce(trim(p_telefono), '') = '' then
-    raise exception 'missing_fields';
-  end if;
+  if auth.uid() is null then raise exception 'AUTH_REQUIRED'; end if;
 
-  -- Bloquea la fila de la sesión: serializa la "última plaza".
-  -- Dos reservas simultáneas para la misma sesión se ordenan aquí, así que
-  -- la segunda ve la primera ya insertada y solo una gana la última plaza.
-  select capacity, starts_at into v_capacity, v_starts
-  from public.class_sessions
-  where id = p_session_id
-  for update;
+  select u.email into v_email from auth.users u where u.id = auth.uid();
+  select p.nombre, p.telefono into v_nombre, v_tel
+  from public.profiles p where p.id = auth.uid();
+  if coalesce(trim(v_nombre), '') = '' then raise exception 'PROFILE_INCOMPLETE'; end if;
 
-  if not found          then raise exception 'session_not_found'; end if;
-  if v_starts <= now()  then raise exception 'session_closed';    end if;
+  -- LOCK de la sesión: serializa la última plaza (imposible sobrevender)
+  select capacity, starts_at, requires_entitlement
+    into v_cap, v_starts, v_req
+  from public.class_sessions where id = p_session_id for update;
+  if not found        then raise exception 'SESSION_NOT_FOUND'; end if;
+  if v_starts <= now() then raise exception 'SESSION_CLOSED';    end if;
 
-  -- Rechaza doble reserva activa del mismo email
-  if exists (
-    select 1 from public.bookings
-    where session_id = p_session_id
-      and lower(email) = lower(p_email)
-      and status in ('confirmed','waitlist')
-  ) then
-    raise exception 'already_booked';
-  end if;
+  -- Fase 3 activará aquí el gating por bono/mensual/autorización
+  -- (requires_entitlement es false en Fase 1, así que se salta).
 
-  select count(*) into v_confirmed
-  from public.bookings
-  where session_id = p_session_id and status = 'confirmed';
+  if exists (select 1 from public.bookings
+             where session_id = p_session_id and lower(email) = lower(v_email)
+               and status = 'confirmed')
+  then raise exception 'ALREADY_BOOKED'; end if;
 
-  v_status := case when v_confirmed < v_capacity then 'confirmed' else 'waitlist' end;
+  select count(*) into v_conf from public.bookings
+   where session_id = p_session_id and status = 'confirmed';
+  if v_conf >= v_cap then raise exception 'SESSION_FULL'; end if;
 
-  insert into public.bookings (session_id, user_id, nombre, email, telefono, message, status)
-  values (
-    p_session_id, auth.uid(),
-    trim(p_nombre), lower(trim(p_email)), trim(p_telefono),
-    nullif(trim(p_message), ''), v_status
-  )
+  insert into public.bookings (session_id, user_id, nombre, email, telefono, message, status, source)
+  values (p_session_id, auth.uid(), v_nombre, lower(v_email),
+          nullif(trim(v_tel), ''), nullif(trim(p_message), ''), 'confirmed', 'self')
   returning id into v_id;
 
-  return query
-    select v_id, v_status,
-           greatest(v_capacity - (v_confirmed + (v_status = 'confirmed')::int), 0);
-end;
-$$;
+  return query select v_id, greatest(v_cap - (v_conf + 1), 0);
+end; $$;
 
--- ── RPC: cancelar (solo el dueño logueado de la reserva) ────────────────
+revoke all on function public.book_session(uuid, text) from public;
+grant execute on function public.book_session(uuid, text) to authenticated;
+
+-- ── RPC: cancelar (dueño de la reserva con 12h, o admin siempre) ────────
 create or replace function public.cancel_booking(p_booking_id uuid)
-returns void
-language plpgsql
-security definer
-set search_path = public
-as $$
+returns void language plpgsql security definer set search_path = public as $$
+declare v_starts timestamptz; v_owner uuid;
 begin
-  update public.bookings
-  set status = 'cancelled', cancelled_at = now()
-  where id = p_booking_id
-    and user_id = auth.uid()
-    and status in ('confirmed','waitlist');
-  if not found then raise exception 'not_allowed'; end if;
-end;
-$$;
+  select s.starts_at, b.user_id into v_starts, v_owner
+  from public.bookings b join public.class_sessions s on s.id = b.session_id
+  where b.id = p_booking_id and b.status = 'confirmed';
+  if not found then raise exception 'NOT_FOUND'; end if;
 
--- ── Permisos de ejecución de las funciones ──────────────────────────────
-revoke all on function public.book_session(uuid,text,text,text,text) from public;
-grant execute on function public.book_session(uuid,text,text,text,text) to anon, authenticated;
+  if not public.is_admin() and v_owner is distinct from auth.uid() then
+    raise exception 'NOT_ALLOWED';
+  end if;
+  if not public.is_admin() and v_starts <= now() + interval '12 hours' then
+    raise exception 'TOO_LATE';
+  end if;
+
+  update public.bookings set status = 'cancelled', cancelled_at = now()
+   where id = p_booking_id;
+end; $$;
 
 revoke all on function public.cancel_booking(uuid) from public;
 grant execute on function public.cancel_booking(uuid) to authenticated;
+
+-- ── Perfil automático al registrarse: vuelca nombre/teléfono del metadata ─
+-- Así, al volver del magic-link, el perfil ya está completo y NO aparece la
+-- segunda pantalla de "completa tu perfil".
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.profiles (id, nombre, telefono)
+  values (
+    new.id,
+    nullif(new.raw_user_meta_data->>'nombre',   ''),
+    nullif(new.raw_user_meta_data->>'telefono', '')
+  )
+  on conflict (id) do update
+    set nombre   = coalesce(excluded.nombre,   public.profiles.nombre),
+        telefono = coalesce(excluded.telefono, public.profiles.telefono);
+  return new;
+end; $$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
 
 -- ── Row Level Security ──────────────────────────────────────────────────
 alter table public.class_types    enable row level security;
@@ -119,23 +130,36 @@ alter table public.class_sessions enable row level security;
 alter table public.bookings       enable row level security;
 alter table public.profiles       enable row level security;
 
--- Horario público (solo lectura)
-drop policy if exists class_types_read    on public.class_types;
-drop policy if exists class_sessions_read on public.class_sessions;
-create policy class_types_read    on public.class_types    for select using (true);
-create policy class_sessions_read on public.class_sessions for select using (true);
+-- Catálogo: lectura pública
+drop policy if exists class_types_read on public.class_types;
+create policy class_types_read on public.class_types for select using (true);
 
--- Reservas: NADIE inserta/actualiza/borra directo (solo vía RPC security definer).
+-- Sesiones: lectura pública de las publicadas; admin ve/gestiona todo
+drop policy if exists class_sessions_read        on public.class_sessions;
+drop policy if exists class_sessions_admin_write on public.class_sessions;
+create policy class_sessions_read on public.class_sessions
+  for select using (published or public.is_admin());
+create policy class_sessions_admin_write on public.class_sessions
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- Reservas: NADIE escribe directo (solo por RPC security definer). SELECT: propia o admin.
 revoke insert, update, delete on public.bookings from anon, authenticated;
--- El usuario logueado ve solo SUS reservas.
-drop policy if exists bookings_own_read on public.bookings;
-create policy bookings_own_read on public.bookings
-  for select to authenticated using (user_id = auth.uid());
+drop policy if exists bookings_read on public.bookings;
+create policy bookings_read on public.bookings
+  for select to authenticated using (user_id = auth.uid() or public.is_admin());
 
--- Perfiles: cada usuario gestiona el suyo.
-drop policy if exists profiles_self on public.profiles;
-create policy profiles_self on public.profiles
-  for all to authenticated using (id = auth.uid()) with check (id = auth.uid());
-
--- Vista agregada: lectura para todos (anon incluido) — solo conteos.
-grant select on public.session_availability to anon, authenticated;
+-- Perfiles: cada quien el suyo; admin lee todos. Nadie se hace admin a sí mismo.
+drop policy if exists profiles_self_read   on public.profiles;
+drop policy if exists profiles_self_insert on public.profiles;
+drop policy if exists profiles_self_update on public.profiles;
+create policy profiles_self_read on public.profiles
+  for select to authenticated using (id = auth.uid() or public.is_admin());
+create policy profiles_self_insert on public.profiles
+  for insert to authenticated
+  with check (id = auth.uid() and coalesce(is_admin, false) = false);
+create policy profiles_self_update on public.profiles
+  for update to authenticated using (id = auth.uid())
+  with check (
+    id = auth.uid()
+    and is_admin = (select p.is_admin from public.profiles p where p.id = auth.uid())
+  );

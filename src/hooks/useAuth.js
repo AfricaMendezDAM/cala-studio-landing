@@ -21,16 +21,23 @@ export function useAuth() {
   const loadProfile = useCallback(async () => {
     if (!user) { setProfile(null); return; }
     const { data } = await supabase
-      .from("profiles").select("nombre, telefono").eq("id", user.id).maybeSingle();
+      .from("profiles").select("nombre, telefono, is_admin").eq("id", user.id).maybeSingle();
     setProfile(data ?? null);
   }, [user]);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
-  const signInWithEmail = (email) =>
+  // El nombre/teléfono viajan como metadata: el trigger handle_new_user los
+  // vuelca al perfil, así el perfil ya llega completo al volver del enlace.
+  // Redirect a la raíz (no a #/reservar): con PKCE el ?code se corrompería tras
+  // el #. App.jsx salta a #/reservar al detectar el login con reserva pendiente.
+  const signInWithEmail = (email, { nombre, telefono } = {}) =>
     supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: { nombre, telefono },
+      },
     });
 
   const saveProfile = async ({ nombre, telefono }) => {
@@ -44,7 +51,8 @@ export function useAuth() {
   const signOut = () => supabase.auth.signOut();
 
   const profileComplete = !!(profile && profile.nombre && profile.telefono);
+  const isAdmin = !!(profile && profile.is_admin);
 
-  return { user, session, loading, profile, profileComplete,
+  return { user, session, loading, profile, profileComplete, isAdmin,
            signInWithEmail, saveProfile, signOut };
 }
