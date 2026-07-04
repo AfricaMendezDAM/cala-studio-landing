@@ -20,7 +20,7 @@ export default function Nav() {
 
   return (
     <nav className={"nav" + (scrolled ? " scrolled" : "")}>
-      <a href="#top" className="brand" style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--ink)" }}>
+      <a href="#top" className="brand" style={{ display: "flex", alignItems: "center", gap: 10, color: scrolled ? "var(--ink)" : "#fff" }}>
         <BrandMark size={22} className="brand-mark" />
         cala.studio
       </a>
