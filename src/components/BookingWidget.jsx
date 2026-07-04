@@ -8,6 +8,8 @@ const MES_LONG  = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio
 const DIA_LONG  = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const pad = n => String(n).padStart(2, "0");
 const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+// Horas SIEMPRE en hora de Madrid (no depende de la zona del navegador)
+const HORA = new Intl.DateTimeFormat("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Madrid" });
 const firstOfMonth = d => new Date(d.getFullYear(), d.getMonth(), 1);
 const addMonths = (d, n) => new Date(d.getFullYear(), d.getMonth() + n, 1);
 
@@ -91,8 +93,8 @@ export default function BookingWidget() {
         capacity: r.capacity, free: r.spots_left,
         start, end,
         durationMin: Math.round((end - start) / 60000),
-        timeStart: `${pad(start.getHours())}:${pad(start.getMinutes())}`,
-        timeEnd: `${pad(end.getHours())}:${pad(end.getMinutes())}`,
+        timeStart: HORA.format(start),
+        timeEnd: HORA.format(end),
         key: ymd(start),
       };
     });
