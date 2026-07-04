@@ -10,9 +10,14 @@
 }
 .gp-back{ font-size: 10px; letter-spacing: .22em; text-transform: uppercase; font-weight: 600; color: var(--ink-mute); }
 .gp-back:hover{ color: var(--ink); }
-.gp-brand{ font-size: 13px; letter-spacing: .16em; font-weight: 500; color: var(--ink); }
-.gp-brand .d{ color: var(--yellow); }
-.gp-brand em{ font-style: italic; color: var(--blue); }
+.gp-mark{ font-size: 12px; letter-spacing: .18em; font-weight: 500; color: var(--ink-mute); }
+.gp-mark .d{ color: var(--yellow); }
+.gp-title{
+  max-width: 640px; margin: 0 auto 24px;
+  font-weight: 200; font-size: clamp(30px, 5vw, 44px); line-height: 1; letter-spacing: -.02em;
+  color: var(--ink); text-transform: uppercase;
+}
+.gp-title em{ font-style: italic; font-weight: 300; color: var(--blue); text-transform: none; }
 
 /* PIN */
 .gp-pin{

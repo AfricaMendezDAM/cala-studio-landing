@@ -66,10 +66,11 @@ export default function GestionPage() {
 
   return (
     <main className="gestion">
-      <div className="gp-head">
+      <header className="gp-head">
         <a href="#" className="gp-back" onClick={goHome}>‹ Volver al estudio</a>
-        <span className="gp-brand">cala<span className="d">.</span>studio · <em>gestión</em></span>
-      </div>
+        <span className="gp-mark">cala<span className="d">.</span>studio</span>
+      </header>
+      <h1 className="gp-title">Gestión de <em>aforo</em></h1>
 
       {!authed ? (
         <form className="gp-pin" onSubmit={enter}>
