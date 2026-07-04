@@ -27,17 +27,14 @@ export function useAuth() {
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
-  // Identificación por CÓDIGO de 6 dígitos (no enlace): se teclea en la misma
-  // pantalla, sin salir de la web ni volver a rellenar nada. El nombre/teléfono
+  // Identificación por ENLACE mágico (sin contraseñas). El enlace redirige al
+  // origin y App.jsx lleva al calendario ya identificada. El nombre/teléfono
   // viajan como metadata (el trigger los vuelca al perfil de usuarios nuevos).
-  const sendCode = (email, { nombre, telefono } = {}) =>
+  const signInWithEmail = (email, { nombre, telefono } = {}) =>
     supabase.auth.signInWithOtp({
       email,
-      options: { data: { nombre, telefono }, shouldCreateUser: true },
+      options: { emailRedirectTo: window.location.origin, data: { nombre, telefono } },
     });
-
-  const verifyCode = (email, token) =>
-    supabase.auth.verifyOtp({ email, token, type: "email" });
 
   const saveProfile = async ({ nombre, telefono }) => {
     // Coge el usuario del cliente (recién verificado), no del estado del hook,
@@ -56,5 +53,5 @@ export function useAuth() {
   const isAdmin = !!(profile && profile.is_admin);
 
   return { user, session, loading, profile, profileComplete, isAdmin,
-           sendCode, verifyCode, saveProfile, signOut };
+           signInWithEmail, saveProfile, signOut };
 }

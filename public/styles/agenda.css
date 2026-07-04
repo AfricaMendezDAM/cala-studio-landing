@@ -11,13 +11,14 @@
 }
 .ag-account.nudge{ border-color: rgba(47,107,150,.55); box-shadow: 0 0 0 3px rgba(47,107,150,.14); }
 .ag-account .acc-loading{ font-size: 11px; letter-spacing:.2em; text-transform:uppercase; color: var(--ink-mute); font-weight:600; }
-.acc-form{ display:flex; align-items:flex-end; justify-content:space-between; gap: 20px; flex-wrap:wrap; }
+.acc-form{ display:flex; flex-direction:column; gap: 12px; }
 .acc-copy{ display:flex; flex-direction:column; gap: 4px; }
 .acc-ey{ font-size: 9px; letter-spacing:.32em; text-transform:uppercase; font-weight:700; color: var(--ink); }
 .acc-tx{ font-size: 12px; color: var(--ink-soft); }
 .acc-row{ display:flex; align-items:center; gap: 8px; flex-wrap:wrap; }
 .acc-row input{
-  padding: 11px 14px; min-width: 190px;
+  flex: 1 1 160px; min-width: 0;
+  padding: 11px 14px;
   background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
   font-size: 13px; font-family: inherit; transition: border-color .2s ease;
 }

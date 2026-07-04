@@ -69,9 +69,8 @@ function DayItem({ c, now, busy, onReserve, onCancel }) {
 }
 
 function Account({ auth, nudge, accountRef }) {
-  const { user, loading, profile, profileComplete, sendCode, verifyCode, saveProfile, signOut } = auth;
+  const { user, loading, profile, profileComplete, signInWithEmail, saveProfile, signOut } = auth;
   const [email, setEmail]   = useState(() => readDraft().email || "");
-  const [code, setCode]     = useState("");
   const [sent, setSent]     = useState(false);
   const [nombre, setNombre] = useState(() => readDraft().nombre || "");
   const [tel, setTel]       = useState(() => readDraft().telefono || "");
@@ -85,21 +84,9 @@ function Account({ auth, nudge, accountRef }) {
     if (!/^\S+@\S+\.\S+$/.test(email)) { setErr("Email no válido"); return; }
     setErr(""); setPending(true);
     localStorage.setItem("cala_profile_draft", JSON.stringify({ nombre: nombre.trim(), telefono: tel.trim(), email: email.trim() }));
-    const { error } = await sendCode(email.trim(), { nombre: nombre.trim(), telefono: tel.trim() });
+    const { error } = await signInWithEmail(email.trim(), { nombre: nombre.trim(), telefono: tel.trim() });
     setPending(false);
     error ? setErr("No se pudo enviar, inténtalo de nuevo") : setSent(true);
-  };
-
-  const verify = async (e) => {
-    e.preventDefault();
-    if (code.trim().length < 6) { setErr("El código son 6 dígitos"); return; }
-    setErr(""); setPending(true);
-    const { error } = await verifyCode(email.trim(), code.trim());
-    if (error) { setPending(false); setErr("Código incorrecto o caducado"); return; }
-    // Sesión creada: guardamos el perfil con los datos ya tecleados (misma pantalla).
-    const { error: pErr } = await saveProfile({ nombre: nombre.trim(), telefono: tel.trim() });
-    setPending(false);
-    if (pErr) setErr(pErr.message || "Entraste, pero no se pudo guardar el perfil");
   };
 
   const doSave = async () => {
@@ -128,24 +115,19 @@ function Account({ auth, nudge, accountRef }) {
     body = <span className="acc-loading">Conectando…</span>;
   } else if (!user) {
     body = sent ? (
-      <form className="acc-form" onSubmit={verify}>
+      <div className="acc-sent">
+        <span className="dot" />
         <div className="acc-copy">
           <span className="acc-ey">Revisa tu correo</span>
-          <span className="acc-tx">Escribe aquí el código que te mandamos a <b>{email}</b><br />o abre el enlace del correo y te lleva de vuelta ya dentro</span>
+          <span className="acc-tx">Te enviamos un enlace a <b>{email}</b><br />Ábrelo y entrarás directamente al calendario</span>
         </div>
-        <div className="acc-row">
-          <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6}
-                 placeholder="Código de 6 dígitos" value={code}
-                 onChange={e => setCode(e.target.value.replace(/\D/g, ""))} />
-          <button className="b" disabled={pending}>{pending ? "Entrando…" : <>Entrar<span className="arw" /></>}</button>
-          <button type="button" className="acc-out" onClick={() => { setSent(false); setCode(""); setErr(""); }}>Cambiar datos</button>
-        </div>
-      </form>
+        <button type="button" className="acc-out" onClick={() => { setSent(false); setErr(""); }}>Usar otro email</button>
+      </div>
     ) : (
       <form className="acc-form" onSubmit={send}>
         <div className="acc-copy">
           <span className="acc-ey">Para reservar</span>
-          <span className="acc-tx">Déjanos tus datos y te mandamos un código</span>
+          <span className="acc-tx">Déjanos tus datos y te enviamos un enlace de acceso</span>
         </div>
         <div className="acc-row">
           <input type="text" placeholder="Nombre" value={nombre}
@@ -156,7 +138,7 @@ function Account({ auth, nudge, accountRef }) {
         <div className="acc-row">
           <input type="email" placeholder="tu@email.com" value={email}
                  onChange={e => setEmail(e.target.value)} autoComplete="email" />
-          <button className="b" disabled={pending}>{pending ? "Enviando…" : <>Enviar código<span className="arw" /></>}</button>
+          <button className="b" disabled={pending}>{pending ? "Enviando…" : <>Enviar enlace<span className="arw" /></>}</button>
         </div>
       </form>
     );
