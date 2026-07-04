@@ -147,7 +147,7 @@ function Account({ auth, nudge, accountRef }) {
       <form className="acc-form" onSubmit={send}>
         <div className="acc-copy">
           <span className="acc-ey">Para reservar</span>
-          <span className="acc-tx">Déjanos tus datos y te mandamos un código — sin contraseñas ni salir de aquí</span>
+          <span className="acc-tx">Déjanos tus datos y te mandamos un código</span>
         </div>
         <div className="acc-row">
           <input type="text" placeholder="Nombre" value={nombre}
@@ -329,6 +329,7 @@ export default function BookingWidget() {
         d, key,
         hasClass: dayClasses.some(c => c.kind === "class"),
         hasEvent: dayClasses.some(c => c.kind === "event"),
+        hasMine: dayClasses.some(c => c.mine),
         selectable: dayClasses.some(c => c.end.getTime() > now),
         isToday: key === todayKey,
         isPast: date < todayMid,
@@ -371,6 +372,7 @@ export default function BookingWidget() {
                       key={c.key}
                       className={"cal-cell"
                         + (c.hasClass ? " has-class" : "") + (c.hasEvent ? " has-event" : "")
+                        + (c.hasMine ? " has-mine" : "")
                         + (c.selectable ? " selectable" : "")
                         + (c.isToday ? " is-today" : "") + (c.isPast ? " is-past" : "")
                         + (c.key === selected ? " is-selected" : "")}
