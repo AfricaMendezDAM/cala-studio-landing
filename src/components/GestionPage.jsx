@@ -11,14 +11,25 @@ export default function GestionPage() {
   const [rows, setRows]     = useState(null);
   const [busy, setBusy]     = useState(false);
   const [err, setErr]       = useState("");
+  const [openId, setOpenId] = useState(null);          // sesión desplegada
+  const [guests, setGuests] = useState({});            // { [sessionId]: array | "loading" }
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
   const goHome = (e) => { e.preventDefault(); window.location.hash = ""; };
+
+  const toast = useCallback((m) => { setErr(m); setTimeout(() => setErr(""), 2500); }, []);
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("session_availability").select("*");
     setRows(data ?? []);
   }, []);
+
+  const loadGuests = useCallback(async (sessionId) => {
+    setGuests(g => ({ ...g, [sessionId]: g[sessionId] ?? "loading" }));
+    const { data, error } = await supabase.rpc("admin_list_guests", { p_session_id: sessionId, p_pin: pin });
+    if (error) { toast("No se pudo cargar la lista"); setGuests(g => ({ ...g, [sessionId]: [] })); return; }
+    setGuests(g => ({ ...g, [sessionId]: data ?? [] }));
+  }, [pin, toast]);
 
   const unlock = useCallback(async (p) => {
     const { data, error } = await supabase.rpc("admin_check_pin", { p_pin: p });
@@ -40,12 +51,32 @@ export default function GestionPage() {
     if (!ok) setErr("PIN incorrecto");
   };
 
-  const setReservadas = async (id, n) => {
+  const toggle = (sessionId) => {
+    const next = openId === sessionId ? null : sessionId;
+    setOpenId(next);
+    if (next && guests[sessionId] === undefined) loadGuests(sessionId);
+  };
+
+  const addGuest = async (sessionId, nombre, telefono) => {
     setBusy(true);
-    const { error } = await supabase.rpc("set_reservadas", { p_session_id: id, p_reservadas: n, p_pin: pin });
+    const { error } = await supabase.rpc("admin_add_guest", {
+      p_session_id: sessionId, p_nombre: nombre, p_telefono: telefono || null, p_pin: pin,
+    });
     setBusy(false);
-    if (error) { setErr("No se pudo guardar"); setTimeout(() => setErr(""), 2500); return; }
-    load();
+    if (error) {
+      toast(/AFORO_COMPLETO/.test(error.message) ? "La clase está completa" : "No se pudo apuntar");
+      return false;
+    }
+    await Promise.all([loadGuests(sessionId), load()]);
+    return true;
+  };
+
+  const removeGuest = async (sessionId, guestId) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_remove_guest", { p_guest_id: guestId, p_pin: pin });
+    setBusy(false);
+    if (error) { toast("No se pudo quitar"); return; }
+    await Promise.all([loadGuests(sessionId), load()]);
   };
 
   const days = useMemo(() => {
@@ -70,12 +101,12 @@ export default function GestionPage() {
         <a href="#" className="gp-back" onClick={goHome}>‹ Volver al estudio</a>
         <span className="gp-mark">cala<span className="d">.</span>studio</span>
       </header>
-      <h1 className="gp-title">Gestión de <em>aforo</em></h1>
+      <h1 className="gp-title">Gestión de <em>reservas</em></h1>
 
       {!authed ? (
         <form className="gp-pin" onSubmit={enter}>
           <span className="gp-ey">Panel privado</span>
-          <p className="gp-lead">Introduce tu PIN para gestionar el aforo</p>
+          <p className="gp-lead">Introduce tu PIN para gestionar las reservas</p>
           <div className="gp-pin-row">
             <input type="password" inputMode="numeric" autoComplete="off" placeholder="PIN"
                    value={pin} onChange={e => setPin(e.target.value)} />
@@ -87,7 +118,7 @@ export default function GestionPage() {
         <div className="gp-loading">Cargando…</div>
       ) : (
         <div className="gp-body">
-          <p className="gp-hint">Resta una plaza cuando alguien reserva · suma si cancela</p>
+          <p className="gp-hint">Apunta a cada persona que te confirma · las plazas se restan solas</p>
           {days.length === 0 && <div className="gp-loading">No hay clases próximas</div>}
           {days.map(day => (
             <section key={day.key} className="gp-day">
@@ -95,23 +126,30 @@ export default function GestionPage() {
               {day.items.map(s => {
                 const nombre = s.category === "evento" ? s.titulo : `${s.name} ${s.name_em}`;
                 const full = s.spots_left <= 0;
+                const open = openId === s.session_id;
                 return (
-                  <div key={s.session_id} className="gp-row">
-                    <div className="gp-when">
-                      <b>{HORA.format(new Date(s.starts_at))}</b>
-                      <span>{nombre}</span>
-                    </div>
-                    <div className="gp-ctrl">
-                      <button className="gp-step" aria-label="Una reserva más"
-                              disabled={busy || full}
-                              onClick={() => setReservadas(s.session_id, s.reservadas + 1)}>−</button>
-                      <span className={"gp-count" + (full ? " full" : "")}>
-                        {full ? "Completo" : `${s.spots_left}/${s.capacity}`}
+                  <div key={s.session_id} className={"gp-item" + (open ? " open" : "")}>
+                    <button className="gp-row" aria-expanded={open} onClick={() => toggle(s.session_id)}>
+                      <span className="gp-when">
+                        <b>{HORA.format(new Date(s.starts_at))}</b>
+                        <span>{nombre}</span>
                       </span>
-                      <button className="gp-step" aria-label="Una reserva menos"
-                              disabled={busy || s.reservadas <= 0}
-                              onClick={() => setReservadas(s.session_id, s.reservadas - 1)}>+</button>
-                    </div>
+                      <span className="gp-ctrl">
+                        <span className={"gp-count" + (full ? " full" : "")}>
+                          {full ? "Completo" : `${s.reservadas}/${s.capacity}`}
+                        </span>
+                        <span className="gp-caret" aria-hidden="true">▾</span>
+                      </span>
+                    </button>
+                    {open && (
+                      <GuestPanel
+                        list={guests[s.session_id]}
+                        full={full}
+                        busy={busy}
+                        onAdd={(n, t) => addGuest(s.session_id, n, t)}
+                        onRemove={(gid) => removeGuest(s.session_id, gid)}
+                      />
+                    )}
                   </div>
                 );
               })}
@@ -122,5 +160,52 @@ export default function GestionPage() {
 
       {err && authed && <div className="gp-toast">{err}</div>}
     </main>
+  );
+}
+
+function GuestPanel({ list, full, busy, onAdd, onRemove }) {
+  const [nombre, setNombre] = useState("");
+  const [tel, setTel]       = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!nombre.trim()) return;
+    const ok = await onAdd(nombre.trim(), tel.trim());
+    if (ok) { setNombre(""); setTel(""); }
+  };
+
+  return (
+    <div className="gp-panel">
+      {list === "loading" || list === undefined ? (
+        <div className="gp-panel-load">Cargando…</div>
+      ) : list.length === 0 ? (
+        <p className="gp-empty">Aún no hay nadie apuntado</p>
+      ) : (
+        <ul className="gp-guests">
+          {list.map(g => (
+            <li key={g.id} className="gp-guest">
+              <span className="gp-guest-name">{g.nombre}</span>
+              {g.telefono
+                ? <a className="gp-guest-tel" href={`tel:${g.telefono}`}>{g.telefono}</a>
+                : <span className="gp-guest-tel none">sin teléfono</span>}
+              <button className="gp-guest-x" aria-label={`Quitar a ${g.nombre}`}
+                      disabled={busy} onClick={() => onRemove(g.id)}>✕</button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {full ? (
+        <p className="gp-full-note">Clase completa</p>
+      ) : (
+        <form className="gp-add" onSubmit={submit}>
+          <input className="gp-add-nombre" placeholder="Nombre" value={nombre}
+                 autoComplete="off" onChange={e => setNombre(e.target.value)} />
+          <input className="gp-add-tel" type="tel" inputMode="tel" placeholder="Teléfono (opcional)"
+                 autoComplete="off" value={tel} onChange={e => setTel(e.target.value)} />
+          <button className="gp-add-b" disabled={busy || !nombre.trim()}>Apuntar</button>
+        </form>
+      )}
+    </div>
   );
 }
