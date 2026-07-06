@@ -71,6 +71,17 @@ export default function GestionPage() {
     return true;
   };
 
+  const updateGuest = async (sessionId, guestId, nombre, telefono) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_update_guest", {
+      p_guest_id: guestId, p_nombre: nombre, p_telefono: telefono || null, p_pin: pin,
+    });
+    setBusy(false);
+    if (error) { toast("No se pudo guardar"); return false; }
+    await loadGuests(sessionId);   // editar no cambia el aforo → no hace falta recargar todo
+    return true;
+  };
+
   const removeGuest = async (sessionId, guestId) => {
     setBusy(true);
     const { error } = await supabase.rpc("admin_remove_guest", { p_guest_id: guestId, p_pin: pin });
@@ -147,6 +158,7 @@ export default function GestionPage() {
                         full={full}
                         busy={busy}
                         onAdd={(n, t) => addGuest(s.session_id, n, t)}
+                        onUpdate={(gid, n, t) => updateGuest(s.session_id, gid, n, t)}
                         onRemove={(gid) => removeGuest(s.session_id, gid)}
                       />
                     )}
@@ -163,7 +175,7 @@ export default function GestionPage() {
   );
 }
 
-function GuestPanel({ list, full, busy, onAdd, onRemove }) {
+function GuestPanel({ list, full, busy, onAdd, onUpdate, onRemove }) {
   const [nombre, setNombre] = useState("");
   const [tel, setTel]       = useState("");
 
@@ -183,14 +195,9 @@ function GuestPanel({ list, full, busy, onAdd, onRemove }) {
       ) : (
         <ul className="gp-guests">
           {list.map(g => (
-            <li key={g.id} className="gp-guest">
-              <span className="gp-guest-name">{g.nombre}</span>
-              {g.telefono
-                ? <a className="gp-guest-tel" href={`tel:${g.telefono}`}>{g.telefono}</a>
-                : <span className="gp-guest-tel none">sin teléfono</span>}
-              <button className="gp-guest-x" aria-label={`Quitar a ${g.nombre}`}
-                      disabled={busy} onClick={() => onRemove(g.id)}>✕</button>
-            </li>
+            <GuestRow key={g.id} guest={g} busy={busy}
+                      onSave={(n, t) => onUpdate(g.id, n, t)}
+                      onRemove={() => onRemove(g.id)} />
           ))}
         </ul>
       )}
@@ -207,5 +214,48 @@ function GuestPanel({ list, full, busy, onAdd, onRemove }) {
         </form>
       )}
     </div>
+  );
+}
+
+function GuestRow({ guest, busy, onSave, onRemove }) {
+  const [editing, setEditing] = useState(false);
+  const [nombre, setNombre]   = useState(guest.nombre);
+  const [tel, setTel]         = useState(guest.telefono || "");
+
+  const start = () => { setNombre(guest.nombre); setTel(guest.telefono || ""); setEditing(true); };
+  const save = async (e) => {
+    e.preventDefault();
+    if (!nombre.trim()) return;
+    const ok = await onSave(nombre.trim(), tel.trim());
+    if (ok) setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <li className="gp-guest editing">
+        <form className="gp-guest-edit" onSubmit={save}>
+          <input className="gp-add-nombre" placeholder="Nombre" value={nombre}
+                 autoComplete="off" autoFocus onChange={e => setNombre(e.target.value)} />
+          <input className="gp-add-tel" type="tel" inputMode="tel" placeholder="Teléfono (opcional)"
+                 autoComplete="off" value={tel} onChange={e => setTel(e.target.value)} />
+          <button type="submit" className="gp-guest-save" disabled={busy || !nombre.trim()}>Guardar</button>
+          <button type="button" className="gp-guest-cancel" disabled={busy}
+                  onClick={() => setEditing(false)}>Cancelar</button>
+        </form>
+      </li>
+    );
+  }
+
+  return (
+    <li className="gp-guest">
+      <span className="gp-guest-name">{guest.nombre}</span>
+      {guest.telefono
+        ? <a className="gp-guest-tel" href={`tel:${guest.telefono}`}>{guest.telefono}</a>
+        : <span className="gp-guest-tel none">sin teléfono</span>}
+      <button className="gp-guest-edit-b" aria-label={`Editar a ${guest.nombre}`}
+              disabled={busy} onClick={start}>✎</button>
+      <button className="gp-guest-x" aria-label={`Quitar a ${guest.nombre}`}
+              disabled={busy} onClick={onRemove}>✕</button>
+    </li>
   );
 }

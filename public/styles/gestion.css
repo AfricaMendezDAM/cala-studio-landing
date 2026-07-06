@@ -98,14 +98,37 @@
 .gp-guest-tel{ font-size: 13px; color: var(--blue); font-variant-numeric: tabular-nums; }
 .gp-guest-tel:hover{ text-decoration: underline; }
 .gp-guest-tel.none{ color: var(--ink-mute); font-style: italic; }
-.gp-guest-x{
+.gp-guest-x, .gp-guest-edit-b{
   flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
   border: 1px solid var(--line); background: transparent; color: var(--ink-mute);
   font-size: 12px; line-height: 1; cursor: pointer; font-family: inherit;
   transition: background .2s, border-color .2s, color .2s;
 }
 .gp-guest-x:hover:not(:disabled){ background: #B8472D; border-color: #B8472D; color: #fff; }
-.gp-guest-x:disabled{ opacity: .4; cursor: default; }
+.gp-guest-edit-b:hover:not(:disabled){ background: var(--ink); border-color: var(--ink); color: #fff; }
+.gp-guest-x:disabled, .gp-guest-edit-b:disabled{ opacity: .4; cursor: default; }
+
+/* Edición en línea de una persona */
+.gp-guest.editing{ padding: 8px 2px; }
+.gp-guest-edit{ display: flex; flex-wrap: wrap; gap: 8px; width: 100%; align-items: center; }
+.gp-guest-edit input{
+  min-width: 0; padding: 10px 14px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
+  font-size: 14px; font-family: inherit; color: var(--ink);
+}
+.gp-guest-edit input:focus{ outline: none; border-color: var(--blue); }
+.gp-guest-edit .gp-add-nombre{ flex: 2 1 130px; }
+.gp-guest-edit .gp-add-tel{ flex: 2 1 130px; }
+.gp-guest-save, .gp-guest-cancel{
+  padding: 9px 16px; border-radius: 999px; font-family: inherit; cursor: pointer;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.gp-guest-save{ border: 1px solid var(--ink); background: var(--ink); color: #fff; }
+.gp-guest-save:hover:not(:disabled){ background: var(--blue); border-color: var(--blue); }
+.gp-guest-save:disabled{ opacity: .5; cursor: default; }
+.gp-guest-cancel{ border: 1px solid var(--line); background: transparent; color: var(--ink-mute); }
+.gp-guest-cancel:hover:not(:disabled){ color: var(--ink); border-color: var(--ink); }
 
 .gp-full-note{ font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); padding: 4px 2px; }
 

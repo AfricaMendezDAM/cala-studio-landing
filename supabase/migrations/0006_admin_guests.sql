@@ -88,7 +88,21 @@ begin
 end; $$;
 grant execute on function public.admin_add_guest(uuid, text, text, text) to anon, authenticated;
 
--- ── 6) RPC: quitar una persona (requiere PIN) ───────────────────────────
+-- ── 6) RPC: editar una persona (requiere PIN) ───────────────────────────
+create or replace function public.admin_update_guest(
+  p_guest_id uuid, p_nombre text, p_telefono text, p_pin text
+) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.admin_check_pin(p_pin) then raise exception 'PIN_INCORRECTO'; end if;
+  if coalesce(trim(p_nombre), '') = '' then raise exception 'NOMBRE_REQUERIDO'; end if;
+  update public.session_guests
+     set nombre = trim(p_nombre), telefono = nullif(trim(p_telefono), '')
+   where id = p_guest_id;
+end; $$;
+grant execute on function public.admin_update_guest(uuid, text, text, text) to anon, authenticated;
+
+-- ── 7) RPC: quitar una persona (requiere PIN) ───────────────────────────
 create or replace function public.admin_remove_guest(p_guest_id uuid, p_pin text)
 returns void
 language plpgsql security definer set search_path = public as $$
@@ -98,5 +112,5 @@ begin
 end; $$;
 grant execute on function public.admin_remove_guest(uuid, text) to anon, authenticated;
 
--- ── 7) Retira el contador +/- antiguo: ahora el aforo lo llevan los nombres
+-- ── 8) Retira el contador +/- antiguo: ahora el aforo lo llevan los nombres
 drop function if exists public.set_reservadas(uuid, int, text);
