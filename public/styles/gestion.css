@@ -155,3 +155,126 @@
   background: #B8472D; color: #fff; padding: 12px 20px; border-radius: 999px;
   font-size: 12px; box-shadow: var(--shadow-lg); z-index: 60;
 }
+
+/* ── Pestañas Reservas / Pagos ───────────────────────────────────────── */
+.gp-tabs{
+  display: flex; gap: 6px; margin-bottom: 22px;
+  background: var(--bg-2); border-radius: 999px; padding: 5px;
+}
+.gp-tab{
+  flex: 1; padding: 10px 16px; border-radius: 999px; border: 0; background: transparent;
+  font-family: inherit; cursor: pointer;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600;
+  color: var(--ink-mute); transition: background .2s, color .2s, box-shadow .2s;
+}
+.gp-tab.on{ background: var(--bg); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.gp-tab:hover:not(.on){ color: var(--ink); }
+
+/* ── Registro de pagos ───────────────────────────────────────────────── */
+.gp-pagos{ display: flex; flex-direction: column; gap: 24px; }
+
+/* Formulario para apuntar un pago (plegable) */
+.gp-pay-add{
+  border: 1px solid var(--line); border-radius: 14px; background: var(--paper); overflow: hidden;
+}
+.gp-pay-add-toggle{
+  list-style: none; cursor: pointer; padding: 14px 18px;
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--blue);
+}
+.gp-pay-add-toggle::-webkit-details-marker{ display: none; }
+.gp-pay-add[open] .gp-pay-add-toggle{ border-bottom: 1px solid var(--line-soft); }
+
+.gp-pay-form{ display: flex; flex-wrap: wrap; gap: 10px; padding: 16px 18px 18px; }
+.gp-pay-item.editing .gp-pay-form{ padding: 0; }
+.gp-pay-f{
+  min-width: 0; padding: 11px 14px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+  font-size: 14px; font-family: inherit; color: var(--ink);
+}
+.gp-pay-f:focus{ outline: none; border-color: var(--blue); }
+.gp-pay-form .nombre{ flex: 1 1 100%; }
+.gp-pay-prod{ display: flex; gap: 10px; flex: 1 1 100%; }
+.gp-pay-prod .concepto{ flex: 1 1 auto; }
+.gp-pay-prod .concepto-libre{ flex: 1 1 140px; }
+.gp-pay-num{ display: flex; gap: 10px; flex: 1 1 100%; }
+.gp-pay-importe-field{ position: relative; flex: 1 1 120px; display: flex; align-items: center; }
+.gp-pay-importe-field .importe{ width: 100%; padding-right: 30px; font-variant-numeric: tabular-nums; }
+.gp-pay-eur{ position: absolute; right: 14px; color: var(--ink-mute); font-size: 14px; pointer-events: none; }
+.gp-pay-num .metodo{ flex: 1 1 140px; }
+.gp-pay-form .tel{ flex: 1 1 160px; }
+.gp-pay-form .nota{ flex: 2 1 200px; }
+
+.gp-pay-estado{
+  display: flex; flex: 1 1 100%; max-width: 260px;
+  background: var(--bg-2); border-radius: 999px; padding: 4px;
+}
+.gp-seg{
+  flex: 1; padding: 9px 14px; border: 0; border-radius: 999px; background: transparent;
+  font-family: inherit; cursor: pointer;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
+  color: var(--ink-mute); transition: background .2s, color .2s;
+}
+.gp-seg.on{ background: var(--bg); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+.gp-pay-form-actions{ display: flex; gap: 8px; flex: 1 1 100%; margin-top: 2px; }
+.gp-pay-save{
+  padding: 11px 22px; border-radius: 999px; border: 1px solid var(--ink); background: var(--ink); color: #fff;
+  font-family: inherit; cursor: pointer;
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase; font-weight: 600;
+  transition: background .2s, border-color .2s;
+}
+.gp-pay-save:hover:not(:disabled){ background: var(--blue); border-color: var(--blue); }
+.gp-pay-save:disabled{ opacity: .5; cursor: default; }
+
+/* Grupos: pendiente de cobro / cobrado */
+.gp-pay-group-head{
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding-bottom: 10px; margin-bottom: 4px; border-bottom: 1px solid var(--line);
+}
+.gp-pay-group-title{
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; color: var(--ink);
+}
+.gp-pay-group-title::before{
+  content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  margin-right: 8px; vertical-align: middle;
+}
+.gp-pay-group.pend .gp-pay-group-title::before{ background: var(--yellow); }
+.gp-pay-group.paid .gp-pay-group-title::before{ background: #4F7A5B; }
+.gp-pay-group-meta{ display: flex; align-items: baseline; gap: 12px; }
+.gp-pay-count{
+  font-size: 10px; letter-spacing: .1em; color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+.gp-pay-total{ font-size: 17px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.gp-pay-group.paid .gp-pay-total{ color: #4F7A5B; }
+
+.gp-pay-list{ list-style: none; margin: 0; padding: 0; }
+.gp-pay-item{ padding: 12px 2px; border-bottom: 1px dashed var(--line-soft); }
+.gp-pay-item:last-child{ border-bottom: 0; }
+.gp-pay-main{ display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.gp-pay-nombre{
+  font-size: 15px; color: var(--ink); font-weight: 500;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.gp-pay-importe{ flex: none; font-size: 16px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.gp-pay-group.paid .gp-pay-importe{ color: #4F7A5B; }
+.gp-pay-sub{ display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.gp-pay-concepto{ font-size: 12px; color: var(--ink-soft); }
+.gp-pay-metodo{
+  font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+  color: var(--ink-mute); background: var(--bg-2); padding: 3px 8px; border-radius: 999px;
+}
+.gp-pay-tel{ font-size: 12px; color: var(--blue); font-variant-numeric: tabular-nums; }
+.gp-pay-tel:hover{ text-decoration: underline; }
+.gp-pay-nota{ font-size: 12px; color: var(--ink-mute); font-style: italic; margin-top: 5px; }
+
+.gp-pay-actions{ display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.gp-pay-mark{
+  margin-right: auto; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--ink-soft); font-family: inherit; cursor: pointer;
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.gp-pay-mark:hover:not(:disabled){ background: #4F7A5B; border-color: #4F7A5B; color: #fff; }
+.gp-pay-mark.undo:hover:not(:disabled){ background: var(--ink-mute); border-color: var(--ink-mute); color: #fff; }
+.gp-pay-mark:disabled{ opacity: .5; cursor: default; }

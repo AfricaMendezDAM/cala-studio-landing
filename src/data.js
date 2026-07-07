@@ -132,6 +132,14 @@ export const BONOS = [
   },
 ];
 
+// Catálogo de productos para el registro de pagos del panel de gestión.
+// Deriva de las tarifas de arriba: los importes salen siempre de PRICING/BONOS,
+// así que al cambiar un precio no hay que tocar nada aquí.
+export const PRODUCTOS = [...PRICING, ...BONOS].map((p) => ({
+  concepto: `${p.name} ${p.nameEm}`,
+  importe: p.amount,
+}));
+
 export const CONTACT_INTERES = [
   { value: "duda",      label: "Una duda general" },
   { value: "mensual-1", label: "Mensualidad · 1 clase/semana" },

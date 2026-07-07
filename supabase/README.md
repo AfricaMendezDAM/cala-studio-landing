@@ -21,8 +21,13 @@ En el panel de Supabase → **SQL Editor** → pega y ejecuta, en orden:
 1. `migrations/0001_schema.sql`  (tablas + tipos de clase)
 2. `migrations/0002_rpc_rls.sql`  (vista de disponibilidad + reservar/cancelar + seguridad)
 3. `migrations/0003_seed_sessions.sql`  (genera las clases Mar/Jue hasta el 31 ago 2026)
+4. `migrations/0004_reconcile.sql` · `0005_admin.sql` · `0006_admin_guests.sql`  (panel de aforo + PIN)
+5. `migrations/0007_admin_payments.sql`  (registro de pagos: quién debe / quién ha pagado y el qué)
 
 *Comprobación:* `select count(*) from class_sessions;` debe devolver un número > 0.
+
+> El **PIN** del panel se fija una vez (ver comentario en `0005_admin.sql`):
+> `insert into public.admin_settings (id, pin) values (1, 'TU-PIN') on conflict (id) do update set pin = excluded.pin;`
 
 ## 3. Activar el login por email (magic link)
 **Authentication → Providers → Email**: deja activado **Email**.
