@@ -43,7 +43,7 @@ export const PRICING = [
     label: "Drop-in",
     name: "Tarifa",
     nameEm: "única",
-    amount: 15,
+    amount: 18,
     per: "/ clase",
     items: [
       "Clase suelta sin compromiso",
@@ -57,7 +57,7 @@ export const PRICING = [
     label: "Más popular",
     name: "Mensual",
     nameEm: "1 / semana",
-    amount: 40,
+    amount: 50,
     per: "/ mes",
     items: [
       "4 clases al mes",
@@ -73,7 +73,7 @@ export const PRICING = [
     label: "Compromiso",
     name: "Mensual",
     nameEm: "2 / semana",
-    amount: 70,
+    amount: 80,
     per: "/ mes",
     items: [
       "8 clases al mes",
@@ -102,7 +102,7 @@ export const BONOS = [
     label: "Flexible",
     name: "Bono",
     nameEm: "5 clases",
-    amount: 65,
+    amount: 75,
     per: "/ bono",
     items: [
       "5 clases a usar antes del 31 ago",
@@ -117,7 +117,7 @@ export const BONOS = [
     label: "Más ahorro",
     name: "Bono",
     nameEm: "10 clases",
-    amount: 120,
+    amount: 140,
     per: "/ bono",
     items: [
       "10 clases a usar antes del 31 ago",

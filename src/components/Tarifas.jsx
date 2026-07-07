@@ -69,16 +69,6 @@ export default function Tarifas() {
       title={<>Tarifas</>}
       right={<>Mat y material incluidos. IVA incluido.</>}
     >
-      <div className="launch-note">
-        <span className="launch-dot" aria-hidden="true"></span>
-        <div className="launch-copy">
-          <span className="launch-eyebrow">Tarifas de apertura</span>
-          <span className="launch-text">
-            Precio de lanzamiento reservado a las <strong>primeras inscripciones</strong>.
-          </span>
-        </div>
-      </div>
-
       {mobile ? (
         <>
           <Carousel plans={PRICING} />
