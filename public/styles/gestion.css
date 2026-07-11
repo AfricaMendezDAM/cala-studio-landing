@@ -150,6 +150,39 @@
 .gp-add-b:hover:not(:disabled){ background: var(--blue); border-color: var(--blue); }
 .gp-add-b:disabled{ opacity: .5; cursor: default; }
 
+/* ── Lista de espera dentro del panel de una clase ───────────────────── */
+.gp-wl-badge{
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700;
+  color: var(--blue); background: rgba(47,107,150,.1); padding: 4px 9px; border-radius: 999px;
+  white-space: nowrap;
+}
+.gp-wl{ margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.gp-wl-head{ display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.gp-wl-title{ font-size: 10px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+.gp-wl-n{
+  min-width: 18px; height: 18px; padding: 0 5px; display: inline-grid; place-items: center;
+  border-radius: 999px; background: var(--blue); color: #fff;
+  font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.gp-wl-list{ list-style: none; margin: 0 0 12px; padding: 0; }
+.gp-wl-item{
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 2px; border-bottom: 1px dashed var(--line-soft);
+}
+.gp-wl-item:last-child{ border-bottom: 0; }
+.gp-wl-name{ flex: 1; min-width: 0; font-size: 14px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gp-wl-tel{ font-size: 13px; color: var(--blue); font-variant-numeric: tabular-nums; }
+.gp-wl-tel:hover{ text-decoration: underline; }
+.gp-wl-tel.none{ color: var(--ink-mute); font-style: italic; }
+.gp-wl-promote{
+  flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--ink-soft); font-family: inherit; cursor: pointer;
+  font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.gp-wl-promote:hover:not(:disabled){ background: var(--blue); border-color: var(--blue); color: #fff; }
+.gp-wl-promote:disabled{ opacity: .5; cursor: default; }
+
 .gp-toast{
   position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
   background: #B8472D; color: #fff; padding: 12px 20px; border-radius: 999px;

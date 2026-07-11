@@ -21,6 +21,7 @@ export default function GestionPage() {
   const [err, setErr]       = useState("");
   const [openId, setOpenId] = useState(null);          // sesión desplegada
   const [guests, setGuests] = useState({});            // { [sessionId]: array | "loading" }
+  const [waits, setWaits]   = useState({});            // lista de espera { [sessionId]: array | "loading" }
   const [tab, setTab]       = useState("reservas");    // pestaña activa: reservas | pagos
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -38,6 +39,13 @@ export default function GestionPage() {
     const { data, error } = await supabase.rpc("admin_list_guests", { p_session_id: sessionId, p_pin: pin });
     if (error) { toast("No se pudo cargar la lista"); setGuests(g => ({ ...g, [sessionId]: [] })); return; }
     setGuests(g => ({ ...g, [sessionId]: data ?? [] }));
+  }, [pin, toast]);
+
+  const loadWaits = useCallback(async (sessionId) => {
+    setWaits(w => ({ ...w, [sessionId]: w[sessionId] ?? "loading" }));
+    const { data, error } = await supabase.rpc("admin_list_waitlist", { p_session_id: sessionId, p_pin: pin });
+    if (error) { toast("No se pudo cargar la lista de espera"); setWaits(w => ({ ...w, [sessionId]: [] })); return; }
+    setWaits(w => ({ ...w, [sessionId]: data ?? [] }));
   }, [pin, toast]);
 
   const unlock = useCallback(async (p) => {
@@ -64,6 +72,7 @@ export default function GestionPage() {
     const next = openId === sessionId ? null : sessionId;
     setOpenId(next);
     if (next && guests[sessionId] === undefined) loadGuests(sessionId);
+    if (next && waits[sessionId]  === undefined) loadWaits(sessionId);
   };
 
   const addGuest = async (sessionId, nombre, telefono) => {
@@ -97,6 +106,42 @@ export default function GestionPage() {
     setBusy(false);
     if (error) { toast("No se pudo quitar"); return; }
     await Promise.all([loadGuests(sessionId), load()]);
+  };
+
+  const addWait = async (sessionId, nombre, telefono) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_add_waitlist", {
+      p_session_id: sessionId, p_nombre: nombre, p_telefono: telefono || null, p_pin: pin,
+    });
+    setBusy(false);
+    if (error) { toast("No se pudo apuntar a la lista de espera"); return false; }
+    await Promise.all([loadWaits(sessionId), load()]);
+    return true;
+  };
+
+  const removeWait = async (sessionId, waitId) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_remove_waitlist", { p_waitlist_id: waitId, p_pin: pin });
+    setBusy(false);
+    if (error) { toast("No se pudo quitar"); return; }
+    await Promise.all([loadWaits(sessionId), load()]);
+  };
+
+  // Pasar a la clase: apunta a la persona como reserva y la saca de la espera.
+  // Reutiliza el aforo atómico de admin_add_guest (falla si ya está completa).
+  const promoteWait = async (sessionId, w) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_add_guest", {
+      p_session_id: sessionId, p_nombre: w.nombre, p_telefono: w.telefono || null, p_pin: pin,
+    });
+    if (error) {
+      setBusy(false);
+      toast(/AFORO_COMPLETO/.test(error.message) ? "La clase está completa" : "No se pudo pasar a la clase");
+      return;
+    }
+    await supabase.rpc("admin_remove_waitlist", { p_waitlist_id: w.id, p_pin: pin });
+    setBusy(false);
+    await Promise.all([loadGuests(sessionId), loadWaits(sessionId), load()]);
   };
 
   const days = useMemo(() => {
@@ -168,6 +213,9 @@ export default function GestionPage() {
                             <span>{nombre}</span>
                           </span>
                           <span className="gp-ctrl">
+                            {s.waitlist_count > 0 && (
+                              <span className="gp-wl-badge">{s.waitlist_count} en espera</span>
+                            )}
                             <span className={"gp-count" + (full ? " full" : "")}>
                               {full ? "Completo" : `${s.reservadas}/${s.capacity}`}
                             </span>
@@ -177,11 +225,15 @@ export default function GestionPage() {
                         {open && (
                           <GuestPanel
                             list={guests[s.session_id]}
+                            waitlist={waits[s.session_id]}
                             full={full}
                             busy={busy}
                             onAdd={(n, t) => addGuest(s.session_id, n, t)}
                             onUpdate={(gid, n, t) => updateGuest(s.session_id, gid, n, t)}
                             onRemove={(gid) => removeGuest(s.session_id, gid)}
+                            onWaitAdd={(n, t) => addWait(s.session_id, n, t)}
+                            onWaitRemove={(wid) => removeWait(s.session_id, wid)}
+                            onPromote={(w) => promoteWait(s.session_id, w)}
                           />
                         )}
                       </div>
@@ -199,7 +251,7 @@ export default function GestionPage() {
   );
 }
 
-function GuestPanel({ list, full, busy, onAdd, onUpdate, onRemove }) {
+function GuestPanel({ list, waitlist, full, busy, onAdd, onUpdate, onRemove, onWaitAdd, onWaitRemove, onPromote }) {
   const [nombre, setNombre] = useState("");
   const [tel, setTel]       = useState("");
 
@@ -237,6 +289,65 @@ function GuestPanel({ list, full, busy, onAdd, onUpdate, onRemove }) {
           <button className="gp-add-b" disabled={busy || !nombre.trim()}>Apuntar</button>
         </form>
       )}
+
+      <WaitlistPanel list={waitlist} full={full} busy={busy}
+                     onAdd={onWaitAdd} onRemove={onWaitRemove} onPromote={onPromote} />
+    </div>
+  );
+}
+
+// Lista de espera de una clase: quién se ha apuntado (por la web o a mano),
+// alta manual, quitar, y "pasar a la clase" cuando se libera una plaza.
+function WaitlistPanel({ list, full, busy, onAdd, onRemove, onPromote }) {
+  const [nombre, setNombre] = useState("");
+  const [tel, setTel]       = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!nombre.trim()) return;
+    const ok = await onAdd(nombre.trim(), tel.trim());
+    if (ok) { setNombre(""); setTel(""); }
+  };
+
+  const count = Array.isArray(list) ? list.length : 0;
+
+  return (
+    <div className="gp-wl">
+      <div className="gp-wl-head">
+        <span className="gp-wl-title">Lista de espera</span>
+        {count > 0 && <span className="gp-wl-n">{count}</span>}
+      </div>
+
+      {list === "loading" || list === undefined ? (
+        <div className="gp-panel-load">Cargando…</div>
+      ) : list.length === 0 ? (
+        <p className="gp-empty">Nadie en espera</p>
+      ) : (
+        <ul className="gp-wl-list">
+          {list.map(w => (
+            <li key={w.id} className="gp-wl-item">
+              <span className="gp-wl-name">{w.nombre}</span>
+              {w.telefono
+                ? <a className="gp-wl-tel" href={`tel:${w.telefono}`}>{w.telefono}</a>
+                : <span className="gp-wl-tel none">sin teléfono</span>}
+              {!full && (
+                <button type="button" className="gp-wl-promote" disabled={busy}
+                        onClick={() => onPromote(w)}>→ A la clase</button>
+              )}
+              <button type="button" className="gp-guest-x" aria-label={`Quitar a ${w.nombre} de la espera`}
+                      disabled={busy} onClick={() => onRemove(w.id)}>✕</button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <form className="gp-add gp-wl-add" onSubmit={submit}>
+        <input className="gp-add-nombre" placeholder="Nombre y apellidos" value={nombre}
+               autoComplete="off" onChange={e => setNombre(e.target.value)} />
+        <input className="gp-add-tel" type="tel" inputMode="tel" placeholder="Teléfono (opcional)"
+               autoComplete="off" value={tel} onChange={e => setTel(e.target.value)} />
+        <button className="gp-add-b" disabled={busy || !nombre.trim()}>A la espera</button>
+      </form>
     </div>
   );
 }

@@ -23,6 +23,7 @@ En el panel de Supabase → **SQL Editor** → pega y ejecuta, en orden:
 3. `migrations/0003_seed_sessions.sql`  (genera las clases Mar/Jue hasta el 31 ago 2026)
 4. `migrations/0004_reconcile.sql` · `0005_admin.sql` · `0006_admin_guests.sql`  (panel de aforo + PIN)
 5. `migrations/0007_admin_payments.sql`  (registro de pagos: quién debe / quién ha pagado y el qué)
+6. `migrations/0008_waitlist.sql`  (lista de espera: la gente se apunta sola cuando la clase está completa + alta manual en gestión)
 
 *Comprobación:* `select count(*) from class_sessions;` debe devolver un número > 0.
 

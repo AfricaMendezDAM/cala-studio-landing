@@ -16,6 +16,57 @@ const addMonths = (d, n) => new Date(d.getFullYear(), d.getMonth() + n, 1);
 // Número de WhatsApp (del teléfono de contacto, solo dígitos)
 const WA_NUMBER = CONTACT.phoneHref.replace(/\D/g, "");
 
+// Cuando la clase está completa, la persona se apunta a la lista de espera
+// con su nombre y apellidos. Va a Supabase (waitlist_join) y sale en gestión.
+function WaitlistJoin({ sessionId }) {
+  const [open, setOpen]           = useState(false);
+  const [nombre, setNombre]       = useState("");
+  const [apellidos, setApellidos] = useState("");
+  const [tel, setTel]             = useState("");
+  const [state, setState]         = useState("idle"); // idle | sending | done | error
+
+  const ready = nombre.trim() && apellidos.trim();
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!ready || state === "sending") return;
+    setState("sending");
+    const nombreCompleto = `${nombre.trim()} ${apellidos.trim()}`;
+    const { error } = await supabase.rpc("waitlist_join", {
+      p_session_id: sessionId, p_nombre: nombreCompleto, p_telefono: tel.trim() || null,
+    });
+    setState(error ? "error" : "done");
+  };
+
+  if (state === "done") {
+    return (
+      <p className="dp-wl-done">✓ Estás en la lista de espera<br />
+        <span>Te avisamos si se libera una plaza</span></p>
+    );
+  }
+  if (!open) {
+    return (
+      <button type="button" className="dp-wl-open" onClick={() => setOpen(true)}>
+        Apuntarme a la lista de espera
+      </button>
+    );
+  }
+  return (
+    <form className="dp-wl" onSubmit={submit}>
+      <input className="dp-wl-f" placeholder="Nombre" autoComplete="given-name"
+             value={nombre} onChange={e => setNombre(e.target.value)} />
+      <input className="dp-wl-f" placeholder="Apellidos" autoComplete="family-name"
+             value={apellidos} onChange={e => setApellidos(e.target.value)} />
+      <input className="dp-wl-f" type="tel" inputMode="tel" placeholder="Teléfono (opcional)"
+             autoComplete="tel" value={tel} onChange={e => setTel(e.target.value)} />
+      <button className="dp-wl-b" disabled={!ready || state === "sending"}>
+        {state === "sending" ? "…" : "Apuntarme"}
+      </button>
+      {state === "error" && <span className="dp-wl-err">No se pudo apuntar, inténtalo de nuevo</span>}
+    </form>
+  );
+}
+
 function DayItem({ c, now, dateLabel }) {
   const isEvent = c.kind === "event";
   const isPast  = c.start.getTime() < now;
@@ -51,6 +102,7 @@ function DayItem({ c, now, dateLabel }) {
           <h4>{c.type.name} <em>{c.type.nameEm}</em></h4>
         )}
         {status}
+        {isFull && !isPast && <WaitlistJoin sessionId={c.id} />}
       </div>
       {!isPast && !isFull && (
         <div className="dp-act">
