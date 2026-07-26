@@ -99,6 +99,8 @@ export default function EventoPage({ slug }) {
             <MultiLine text={ev.lede} className="ev-lede" />
           </header>
 
+          <MultiLine text={ev.descripcion} className="ev-descr" />
+
           {/* Esenciales — un eco breve del cartel, sin repetirlo entero */}
           <ul className="ev-meta">
             <li><span className="ev-meta-k">Cuándo</span><span className="ev-meta-v">{ev.cuando} · {ev.hora}</span></li>

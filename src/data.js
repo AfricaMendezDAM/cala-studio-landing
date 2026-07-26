@@ -122,6 +122,8 @@ export const EVENTOS = {
     nivel: "Todos los niveles",
     aforo: "Plazas limitadas",
     lede: "Una mañana entre viñas, la esterilla al aire libre y una copa para brindar",
+    // Descripción — da un poco más que el cartel: el porqué, no solo el plan
+    descripcion: "Pilates & Wine es nuestra excusa para salir del estudio y encontrarnos en un lugar bonito. Una mañana para movernos al aire libre entre viñas, reconectar con el cuerpo y con la naturaleza, y quedarnos después a charlar entre amigas con una copa en la mano",
     // Programa breve (lo que ya anuncia el cartel, en una línea)
     programa: "Masterclass de pilates · aperitivo con vino · paseo por las viñas",
     // CTA de reserva — abre WhatsApp con el mensaje ya escrito
