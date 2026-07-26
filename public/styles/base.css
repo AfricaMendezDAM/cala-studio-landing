@@ -15,6 +15,7 @@
   --blue:      #2F6B96;   /* azul mediterráneo */
   --blue-deep: #224F70;
   --yellow:    #D9B65A;
+  --yellow-hi: #E4C56E;   /* amarillo un punto más claro — hover de CTA */
 
   --shadow-lg: 0 30px 60px -30px rgba(0,0,0,.32);
 }

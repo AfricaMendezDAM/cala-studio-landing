@@ -71,6 +71,16 @@
   font-weight: 500;
   color: #FFF;
 }
+.events-card .teaser-link{
+  border-radius: 8px; margin: 0 -10px; padding-left: 10px; padding-right: 10px;
+  transition: background .2s ease;
+}
+.events-card .teaser-link:hover{ background: rgba(255,255,255,.06); }
+.events-card .teaser-arw{
+  margin-left: 4px; color: var(--yellow); font-size: 15px; font-weight: 400;
+  transition: transform .2s ease; align-self: center;
+}
+.events-card .teaser-link:hover .teaser-arw{ transform: translateX(3px); }
 
 .map-card{
   position:relative;
@@ -166,4 +176,9 @@
   .venue-lockup .venue-marks{ gap: 18px; }
   .venue-lockup .v-cala{ font-size: 18px; }
   .venue-lockup .v-melox{ height: 58px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .events-card .badge .y{ animation: none; }
+  .events-card .teaser-link:hover .teaser-arw{ transform: none; }
 }

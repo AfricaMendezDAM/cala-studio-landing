@@ -1,0 +1,162 @@
+/* ── Página de detalle de evento (#/evento/<slug>) ───────────────────────
+   Hermana de la página de reserva: split editorial. A la izquierda el CARTEL
+   entero (nunca recortado) sobre fondo cálido; a la derecha el detalle y un
+   CTA de reserva claro. */
+.evento-page{
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 48fr 52fr;
+  background: var(--bg);
+}
+
+/* ── Columna del cartel ─────────────────────────────────────────────── */
+.ev-visual{
+  position: relative; min-height: 100dvh; overflow: hidden;
+  display: flex; flex-direction: column;
+  gap: clamp(18px, 3vh, 32px);
+  padding: clamp(24px, 3.4vw, 52px);
+  background:
+    radial-gradient(120% 90% at 15% 0, rgba(217,182,90,.16), transparent 55%),
+    linear-gradient(200deg, var(--bg-2) 0%, #EFE8DD 58%, #E7DDCB 100%);
+}
+.ev-grain{
+  position: absolute; inset: 0; opacity: .05; mix-blend-mode: multiply; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.ev-visual > :not(.ev-grain){ position: relative; z-index: 1; }
+
+.ev-visual-top{ display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.ev-brand{ display: flex; align-items: center; gap: 12px; }
+.ev-mark{ width: 32px; opacity: .9; }
+.ev-word{ color: var(--ink); font-size: 14px; letter-spacing: .18em; font-weight: 500; }
+.ev-word .d{ color: var(--yellow); }
+.ev-back{
+  display: inline-flex; align-items: center; min-height: 44px;
+  margin: -12px 0; padding: 0 4px;
+  color: var(--ink-soft); font-size: 10px; letter-spacing: .24em; text-transform: uppercase;
+  font-weight: 600; transition: color .2s ease;
+}
+.ev-back:hover{ color: var(--ink); }
+
+.ev-poster-wrap{
+  flex: 1; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.ev-poster{
+  max-width: 100%; max-height: min(72vh, 640px); width: auto; height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg), 0 2px 8px rgba(0,0,0,.08);
+}
+/* Marcador cuando aún no hay cartel subido */
+.ev-poster-ph{
+  width: min(88%, 420px); aspect-ratio: 3 / 4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  text-align: center; padding: 32px;
+  background: linear-gradient(180deg, var(--paper), var(--bg-2));
+  border: 1px solid var(--line); box-shadow: var(--shadow-lg);
+}
+.ev-ph-eyebrow{ font-size: 10px; letter-spacing: .34em; text-transform: uppercase; font-weight: 600; color: var(--blue); }
+.ev-ph-title{ font-size: clamp(30px, 4vw, 42px); font-weight: 200; line-height: 1; letter-spacing: -.02em; color: var(--ink); text-transform: uppercase; }
+.ev-ph-when{ font-size: 12px; letter-spacing: .22em; text-transform: uppercase; font-weight: 600; color: var(--yellow); }
+.ev-ph-note{ margin-top: 8px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+
+.ev-visual-foot{
+  display: flex; align-items: center; gap: 10px;
+  color: var(--ink-soft); font-size: 11px; letter-spacing: .26em; text-transform: uppercase; font-weight: 600;
+}
+.ev-dot i{ display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 0 4px rgba(217,182,90,.28); }
+
+/* ── Columna de detalle ─────────────────────────────────────────────── */
+.ev-panel{
+  display: flex; justify-content: center;
+  padding: clamp(30px, 4vw, 72px) clamp(22px, 3.4vw, 60px);
+  background: radial-gradient(120% 90% at 100% 0, var(--bg-2), var(--bg) 62%);
+}
+.ev-panel__in{ width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 26px; }
+
+.ev-head{ display: flex; flex-direction: column; gap: 16px; }
+.ev-eyebrow{ font-size: 11px; letter-spacing: .34em; text-transform: uppercase; font-weight: 600; color: var(--blue); }
+.ev-title{
+  font-weight: 200; font-size: clamp(42px, 5.6vw, 78px); line-height: .94; letter-spacing: -.03em;
+  color: var(--ink); text-transform: uppercase;
+}
+.ev-title em{ font-style: italic; font-weight: 400; color: var(--yellow); text-transform: none; }
+.ev-lede{ color: var(--ink-soft); font-weight: 300; font-size: clamp(15px, 1.2vw, 18px); line-height: 1.6; }
+
+.ev-descr{ color: var(--ink-soft); font-size: 14.5px; line-height: 1.7; }
+
+/* Datos clave */
+.ev-facts{
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 10px; overflow: hidden;
+}
+.ev-fact{ background: var(--paper); padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+.ev-fact-k{ font-size: 9.5px; letter-spacing: .24em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+.ev-fact-v{ font-size: 16px; font-weight: 400; color: var(--ink); }
+.ev-fact-note{ font-size: 11.5px; color: var(--ink-soft); font-style: italic; }
+
+/* Qué incluye */
+.ev-incluye{ display: flex; flex-direction: column; gap: 12px; }
+.ev-incluye-k{ font-size: 10px; letter-spacing: .24em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+.ev-incluye-list{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.ev-incluye-list li{
+  position: relative; padding-left: 22px; font-size: 14.5px; color: var(--ink); line-height: 1.5;
+}
+.ev-incluye-list li::before{
+  content: ""; position: absolute; left: 0; top: 8px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--yellow); box-shadow: 0 0 0 3px rgba(217,182,90,.2);
+}
+
+/* ── CTA de reserva — la pieza clave ────────────────────────────────── */
+.ev-reserva{
+  margin-top: 4px;
+  background: linear-gradient(160deg, var(--ink) 0%, #2A2825 100%);
+  border-radius: 14px; padding: 26px 26px 22px;
+  display: flex; flex-direction: column; gap: 16px;
+  box-shadow: var(--shadow-lg);
+}
+.ev-reserva-copy{ display: flex; flex-direction: column; gap: 5px; }
+.ev-reserva-ey{ font-size: 10px; letter-spacing: .3em; text-transform: uppercase; font-weight: 700; color: var(--yellow); }
+.ev-reserva-lead{ color: rgba(255,255,255,.82); font-size: 14px; line-height: 1.5; }
+.ev-cta{
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 16px 26px; border-radius: 999px;
+  background: var(--yellow); color: var(--ink);
+  font-size: 12px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700;
+  cursor: pointer; transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+  box-shadow: 0 10px 24px -12px rgba(217,182,90,.7);
+}
+.ev-cta:hover{ background: var(--yellow-hi); transform: translateY(-1px); box-shadow: 0 14px 30px -12px rgba(217,182,90,.8); }
+.ev-cta-arw{ position: relative; width: 16px; height: 1px; background: currentColor; }
+.ev-cta-arw::after{
+  content: ""; position: absolute; right: 0; top: -3px; width: 7px; height: 7px;
+  border-top: 1px solid currentColor; border-right: 1px solid currentColor; transform: rotate(45deg);
+}
+.ev-cta:hover .ev-cta-arw{ animation: ev-nudge .8s ease infinite; }
+@keyframes ev-nudge{ 50%{ transform: translateX(3px); } }
+.ev-fine{ text-align: center; color: rgba(255,255,255,.6); font-size: 11px; letter-spacing: .08em; }
+
+/* ── Evento inexistente ─────────────────────────────────────────────── */
+.ev-404{ display: grid; place-items: center; padding: 40px; }
+.ev-404-in{ display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+.ev-404-title{ font-weight: 200; font-size: clamp(28px, 5vw, 40px); text-transform: uppercase; letter-spacing: -.02em; color: var(--ink); }
+.ev-404 .ev-cta{ text-decoration: none; }
+
+/* ── Móvil ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px){
+  .evento-page{ grid-template-columns: 1fr; }
+  .ev-visual{ min-height: auto; padding-bottom: clamp(28px, 5vh, 44px); }
+  .ev-poster{ max-height: 68vh; }
+  .ev-panel{ padding-top: clamp(28px, 6vw, 44px); }
+}
+@media (max-width: 520px){
+  .ev-facts{ grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce){
+  .ev-cta:hover{ transform: none; }
+  .ev-cta:hover .ev-cta-arw{ animation: none; }
+  .ev-poster{ transition: none; }
+}

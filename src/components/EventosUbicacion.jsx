@@ -11,15 +11,24 @@ function EventsCard() {
         de los primeros en recibir el calendario.
       </p>
       <div className="teasers">
-        {EVENT_TEASERS.map((e, i) => (
-          <div key={i} className={"teaser" + (e.place ? " teaser-confirmed" : "")}>
-            <div className="teaser-left">
-              <span className="when">{e.when}</span>
-              {e.place && <span className="place">{e.place}</span>}
-            </div>
-            <span className="name">{e.name}</span>
-          </div>
-        ))}
+        {EVENT_TEASERS.map((e, i) => {
+          const inner = (
+            <>
+              <div className="teaser-left">
+                <span className="when">{e.when}</span>
+                {e.place && <span className="place">{e.place}</span>}
+              </div>
+              <span className="name">{e.name}</span>
+              {e.slug && <span className="teaser-arw" aria-hidden="true">→</span>}
+            </>
+          );
+          const cls = "teaser" + (e.place ? " teaser-confirmed" : "") + (e.slug ? " teaser-link" : "");
+          return e.slug ? (
+            <a key={i} className={cls} href={`#/evento/${e.slug}`}>{inner}</a>
+          ) : (
+            <div key={i} className={cls}>{inner}</div>
+          );
+        })}
       </div>
     </div>
   );

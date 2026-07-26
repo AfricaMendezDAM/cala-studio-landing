@@ -93,9 +93,44 @@ export const EVENT_TEASERS = [
     place: "Viña do Grobe",
     desc: "Masterclass de pilates, paseo por la viña y picoteo con vino de la zona. Fecha por confirmar.",
     confirmed: false,
+    slug: "pilates-and-wine",
   },
   { when: "Septiembre · 2026", name: "COMING SOON" },
 ];
+
+// Detalle de cada evento → página dedicada #/evento/<slug>.
+// El cartel manda: la página lo muestra entero (sin recortar) y ofrece un
+// CTA de reserva claro por WhatsApp (mismo modelo que las clases).
+export const EVENTOS = {
+  "pilates-and-wine": {
+    slug: "pilates-and-wine",
+    nombre: "Pilates & Wine",
+    nombreEm: "& Wine",           // parte en cursiva/dorado del titular
+    eyebrow: "Evento de verano · Edición I",
+    poster: "assets/eventos/pilates-and-wine.jpg",
+    when: "Agosto · 2026",
+    whenNota: "Fecha por confirmar",
+    place: "Viña do Grobe",
+    placeNota: "O Grove · Rías Baixas",
+    lede: "Una mañana entre viñas\nEl mat, la marea de fondo\ny una copa para brindar",
+    descripcion:
+      "Empezamos con una masterclass de pilates frente a la viña\nseguimos con un paseo entre viñedos\ny cerramos con un picoteo y vino de la zona",
+    incluye: [
+      "Masterclass de pilates al aire libre",
+      "Paseo guiado por los viñedos",
+      "Picoteo y cata de vino local",
+      "Un rincón de calma frente al mar",
+    ],
+    aforo: "Plazas muy limitadas",
+    nivel: "Todos los niveles",
+    // CTA de reserva — se abre WhatsApp con el mensaje ya escrito
+    reservaMsg: "Hola! Quiero reservar plaza para Pilates & Wine (Agosto 2026)",
+  },
+};
+
+export function getEvento(slug) {
+  return EVENTOS[slug] || null;
+}
 
 export const BONOS = [
   {
