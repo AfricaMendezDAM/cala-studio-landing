@@ -57,11 +57,17 @@ export default function EventoPage({ slug }) {
     ? nombre.slice(0, nombre.length - ev.nombreEm.length).trim()
     : nombre;
 
+  // Tema por evento → variables CSS que tiñen la página al son de su cartel
+  const t = ev.tema || {};
+  const themeVars = {
+    "--ev-accent": t.accent, "--ev-accent-deep": t.accentDeep,
+    "--ev-bg": t.bg, "--ev-bg-2": t.bg2, "--ev-panel": t.panel,
+  };
+
   return (
-    <main className="evento-page">
-      {/* Columna del cartel — protagonista, entero sobre fondo cálido */}
+    <main className="evento-page" style={themeVars}>
+      {/* Columna del cartel — protagonista, entero sobre su propia crema */}
       <aside className="ev-visual">
-        <span className="ev-grain" aria-hidden="true" />
         <div className="ev-visual-top">
           <div className="ev-brand">
             <img className="ev-mark" src="assets/cala-isotipo.svg" alt="" />
@@ -75,7 +81,7 @@ export default function EventoPage({ slug }) {
             <div className="ev-poster ev-poster-ph" role="img" aria-label={`Cartel de ${ev.nombre} — próximamente`}>
               <span className="ev-ph-eyebrow">{ev.eyebrow}</span>
               <span className="ev-ph-title">{ev.nombre}</span>
-              <span className="ev-ph-when">{ev.when}</span>
+              <span className="ev-ph-when">{ev.cuando}</span>
               <span className="ev-ph-note">Cartel próximamente</span>
             </div>
           ) : (
@@ -83,13 +89,9 @@ export default function EventoPage({ slug }) {
                  onError={() => setPosterFailed(true)} />
           )}
         </div>
-
-        <div className="ev-visual-foot">
-          <span className="ev-dot"><i /></span>{ev.place} · {ev.when}
-        </div>
       </aside>
 
-      {/* Columna de detalle + CTA de reserva */}
+      {/* Columna de acompañamiento + CTA de reserva */}
       <section className="ev-panel">
         <div className="ev-panel__in">
           <header className="ev-head">
@@ -100,44 +102,17 @@ export default function EventoPage({ slug }) {
             <MultiLine text={ev.lede} className="ev-lede" />
           </header>
 
-          <MultiLine text={ev.descripcion} className="ev-descr" />
-
-          <ul className="ev-facts">
-            <li className="ev-fact">
-              <span className="ev-fact-k">Cuándo</span>
-              <span className="ev-fact-v">{ev.when}</span>
-              {ev.whenNota && <span className="ev-fact-note">{ev.whenNota}</span>}
-            </li>
-            <li className="ev-fact">
-              <span className="ev-fact-k">Dónde</span>
-              <span className="ev-fact-v">{ev.place}</span>
-              {ev.placeNota && <span className="ev-fact-note">{ev.placeNota}</span>}
-            </li>
-            <li className="ev-fact">
-              <span className="ev-fact-k">Nivel</span>
-              <span className="ev-fact-v">{ev.nivel}</span>
-            </li>
-            <li className="ev-fact">
-              <span className="ev-fact-k">Aforo</span>
-              <span className="ev-fact-v">{ev.aforo}</span>
-            </li>
+          {/* Esenciales — un eco breve del cartel, sin repetirlo entero */}
+          <ul className="ev-meta">
+            <li><span className="ev-meta-k">Cuándo</span><span className="ev-meta-v">{ev.cuando} · {ev.hora}</span></li>
+            <li><span className="ev-meta-k">Dónde</span><span className="ev-meta-v">{ev.lugar}</span></li>
+            {ev.programa && <li><span className="ev-meta-k">Plan</span><span className="ev-meta-v">{ev.programa}</span></li>}
+            <li><span className="ev-meta-k">Nivel</span><span className="ev-meta-v">{ev.nivel} · {ev.aforo}</span></li>
           </ul>
 
-          {ev.incluye?.length > 0 && (
-            <div className="ev-incluye">
-              <span className="ev-incluye-k">Qué incluye</span>
-              <ul className="ev-incluye-list">
-                {ev.incluye.map((it, i) => <li key={i}>{it}</li>)}
-              </ul>
-            </div>
-          )}
-
-          {/* CTA de reserva — el corazón de la página */}
+          {/* CTA de reserva — la acción de la página */}
           <div className="ev-reserva">
-            <div className="ev-reserva-copy">
-              <span className="ev-reserva-ey">Reserva tu plaza</span>
-              <p className="ev-reserva-lead">Te confirmamos la fecha y tu plaza al momento</p>
-            </div>
+            {ev.precio && <span className="ev-precio">{ev.precio}<span className="ev-precio-k">por persona</span></span>}
             <a className="ev-cta" href={waHref} target="_blank" rel="noopener">
               Reservar por WhatsApp<span className="ev-cta-arw" aria-hidden="true" />
             </a>

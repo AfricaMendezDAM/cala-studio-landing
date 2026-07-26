@@ -105,26 +105,30 @@ export const EVENTOS = {
   "pilates-and-wine": {
     slug: "pilates-and-wine",
     nombre: "Pilates & Wine",
-    nombreEm: "& Wine",           // parte en cursiva/dorado del titular
+    nombreEm: "& Wine",           // parte en cursiva/acento del titular
     eyebrow: "Evento de verano · Edición I",
-    poster: "assets/eventos/pilates-and-wine.jpg",
-    when: "Agosto · 2026",
-    whenNota: "Fecha por confirmar",
-    place: "Viña do Grobe",
-    placeNota: "O Grove · Rías Baixas",
-    lede: "Una mañana entre viñas\nEl mat, la marea de fondo\ny una copa para brindar",
-    descripcion:
-      "Empezamos con una masterclass de pilates frente a la viña\nseguimos con un paseo entre viñedos\ny cerramos con un picoteo y vino de la zona",
-    incluye: [
-      "Masterclass de pilates al aire libre",
-      "Paseo guiado por los viñedos",
-      "Picoteo y cata de vino local",
-      "Un rincón de calma frente al mar",
-    ],
-    aforo: "Plazas muy limitadas",
+    poster: "assets/eventos/pilates-and-wine.png",
+    // Paleta propia del evento — armoniza la página con el cartel
+    // (terracota + crema). Cada evento futuro trae la suya.
+    tema: {
+      accent:     "#C1402E",   // terracota del cartel
+      accentDeep: "#9C3020",
+      bg:         "#F6E7DC",    // crema cálida del cartel
+      bg2:        "#EFD9C9",
+      panel:      "#FBF4ED",
+    },
+    // Datos alineados con el cartel — nada que se contradiga
+    cuando: "Sábado 15 de agosto",
+    hora: "10:30h",
+    lugar: "Bodega Casal Fuentes",
+    precio: "35€",
     nivel: "Todos los niveles",
-    // CTA de reserva — se abre WhatsApp con el mensaje ya escrito
-    reservaMsg: "Hola! Quiero reservar plaza para Pilates & Wine (Agosto 2026)",
+    aforo: "Plazas limitadas",
+    lede: "Una mañana entre viñas\nel mat al aire libre\ny una copa para brindar",
+    // Programa breve (lo que ya anuncia el cartel, en una línea)
+    programa: "Masterclass de pilates · aperitivo con vino · paseo por las viñas",
+    // CTA de reserva — abre WhatsApp con el mensaje ya escrito
+    reservaMsg: "Hola! Quiero reservar plaza para Pilates & Wine (sábado 15 de agosto)",
   },
 };
 
