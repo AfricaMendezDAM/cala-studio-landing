@@ -59,10 +59,7 @@ export default function EventoPage({ slug }) {
 
   // Tema por evento → variables CSS que tiñen la página al son de su cartel
   const t = ev.tema || {};
-  const themeVars = {
-    "--ev-accent": t.accent, "--ev-accent-deep": t.accentDeep,
-    "--ev-bg": t.bg, "--ev-bg-2": t.bg2, "--ev-panel": t.panel,
-  };
+  const themeVars = { "--ev-accent": t.accent, "--ev-accent-deep": t.accentDeep };
 
   return (
     <main className="evento-page" style={themeVars}>
@@ -116,7 +113,7 @@ export default function EventoPage({ slug }) {
             <a className="ev-cta" href={waHref} target="_blank" rel="noopener">
               Reservar por WhatsApp<span className="ev-cta-arw" aria-hidden="true" />
             </a>
-            <p className="ev-fine">Plazas limitadas · Sin pago online</p>
+            <p className="ev-fine">Plazas limitadas</p>
           </div>
         </div>
       </section>

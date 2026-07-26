@@ -8,7 +8,7 @@
   min-height: 100dvh;
   display: grid;
   grid-template-columns: 48fr 52fr;
-  background: var(--ev-bg, #F6E7DC);
+  background: #FBFAF8;   /* blanco roto — nunca crema/beige */
 }
 
 /* ── Columna del cartel ─────────────────────────────────────────────── */
@@ -17,8 +17,8 @@
   display: flex; flex-direction: column; gap: clamp(18px, 3vh, 30px);
   padding: clamp(24px, 3.4vw, 52px);
   background:
-    radial-gradient(120% 80% at 18% 0, rgba(255,255,255,.55), transparent 52%),
-    linear-gradient(200deg, var(--ev-bg, #F6E7DC) 0%, var(--ev-bg-2, #EFD9C9) 100%);
+    radial-gradient(130% 80% at 20% 0, #FFFFFF, transparent 55%),
+    #FBFAF8;
 }
 .ev-visual-top{ display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .ev-brand{ display: flex; align-items: center; gap: 12px; }
@@ -43,8 +43,8 @@
   width: min(88%, 420px); aspect-ratio: 3 / 4;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
   text-align: center; padding: 32px;
-  background: linear-gradient(180deg, #FFFFFF, var(--ev-bg, #F6E7DC));
-  border: 1px solid rgba(90,40,25,.12);
+  background: linear-gradient(180deg, #FFFFFF, #F4F3F0);
+  border: 1px solid rgba(31,30,28,.1);
 }
 .ev-ph-eyebrow{ font-size: 10px; letter-spacing: .34em; text-transform: uppercase; font-weight: 600; color: var(--ev-accent-deep, #9C3020); }
 .ev-ph-title{ font-size: clamp(30px, 4vw, 42px); font-weight: 200; line-height: 1; letter-spacing: -.02em; color: var(--ink); text-transform: uppercase; }
@@ -55,9 +55,7 @@
 .ev-panel{
   display: flex; justify-content: center;
   padding: clamp(30px, 4vw, 72px) clamp(22px, 3.4vw, 60px);
-  background:
-    radial-gradient(120% 90% at 100% 0, var(--ev-bg, #F6E7DC), transparent 60%),
-    var(--ev-panel, #FBF4ED);
+  background: #FBFAF8;
 }
 .ev-panel__in{ width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 26px; }
 
@@ -68,7 +66,7 @@
   color: var(--ink); text-transform: uppercase;
 }
 .ev-title em{ font-style: italic; font-weight: 400; color: var(--ev-accent, #C1402E); text-transform: none; }
-.ev-lede{ color: var(--ink-soft); font-weight: 300; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.6; }
+.ev-lede{ color: var(--ink-soft); font-weight: 300; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.65; text-indent: 1.4em; max-width: 42ch; }
 
 /* Esenciales — eco breve, no una copia del cartel */
 .ev-meta{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }

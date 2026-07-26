@@ -108,14 +108,11 @@ export const EVENTOS = {
     nombreEm: "& Wine",           // parte en cursiva/acento del titular
     eyebrow: "Evento de verano · Edición I",
     poster: "assets/eventos/pilates-and-wine.png",
-    // Paleta propia del evento — armoniza la página con el cartel
-    // (terracota + crema). Cada evento futuro trae la suya.
+    // Acento propio del evento — tiñe eyebrow, título, precio y CTA para
+    // armonizar con el cartel. El fondo va siempre en blanco roto.
     tema: {
       accent:     "#C1402E",   // terracota del cartel
       accentDeep: "#9C3020",
-      bg:         "#F6E7DC",    // crema cálida del cartel
-      bg2:        "#EFD9C9",
-      panel:      "#FBF4ED",
     },
     // Datos alineados con el cartel — nada que se contradiga
     cuando: "Sábado 15 de agosto",
@@ -124,7 +121,7 @@ export const EVENTOS = {
     precio: "35€",
     nivel: "Todos los niveles",
     aforo: "Plazas limitadas",
-    lede: "Una mañana entre viñas\nel mat al aire libre\ny una copa para brindar",
+    lede: "Una mañana entre viñas, la esterilla al aire libre y una copa para brindar",
     // Programa breve (lo que ya anuncia el cartel, en una línea)
     programa: "Masterclass de pilates · aperitivo con vino · paseo por las viñas",
     // CTA de reserva — abre WhatsApp con el mensaje ya escrito
