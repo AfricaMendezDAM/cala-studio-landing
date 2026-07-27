@@ -20,11 +20,7 @@ function Ubicacion() {
 
         <div className="foot-venue">
           <span className="foot-venue__eyebrow">Nuestra casa este verano</span>
-          <div className="foot-venue__marks">
-            <span className="v-cala">cala<span className="dot">.</span>studio</span>
-            <span className="v-x">×</span>
-            <img className="v-melox" src={partner.logo} alt={partner.name} loading="lazy" />
-          </div>
+          <img className="v-melox" src={partner.logo} alt={partner.name} loading="lazy" />
         </div>
       </div>
 

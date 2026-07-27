@@ -57,9 +57,6 @@ export default function EventoPage({ slug }) {
     ? nombre.slice(0, nombre.length - ev.nombreEm.length).trim()
     : nombre;
 
-  // Edición ya celebrada: la página queda como archivo del evento
-  const pasado = ev.estado === "celebrado";
-
   // Tema por evento → variables CSS que tiñen la página al son de su cartel
   const t = ev.tema || {};
   const themeVars = { "--ev-accent": t.accent, "--ev-accent-deep": t.accentDeep };
@@ -95,9 +92,6 @@ export default function EventoPage({ slug }) {
       <section className="ev-panel">
         <div className="ev-panel__in">
           <header className="ev-head">
-            {ev.estadoLabel && (
-              <span className={"ev-status is-" + (ev.estado || "proximo")}>{ev.estadoLabel}</span>
-            )}
             <span className="ev-eyebrow">{ev.eyebrow}</span>
             <h1 className="ev-title">
               {tituloBase} {ev.nombreEm && <em>{ev.nombreEm}</em>}
@@ -109,7 +103,7 @@ export default function EventoPage({ slug }) {
 
           {/* Esenciales — un eco breve del cartel, sin repetirlo entero */}
           <ul className="ev-meta">
-            <li><span className="ev-meta-k">{pasado ? "Se celebró" : "Cuándo"}</span><span className="ev-meta-v">{ev.cuando} · {ev.hora}</span></li>
+            <li><span className="ev-meta-k">Cuándo</span><span className="ev-meta-v">{ev.cuando} · {ev.hora}</span></li>
             <li><span className="ev-meta-k">Dónde</span><span className="ev-meta-v">{ev.lugar}</span></li>
             {ev.programa && <li><span className="ev-meta-k">Plan</span><span className="ev-meta-v">{ev.programa}</span></li>}
             <li><span className="ev-meta-k">Nivel</span><span className="ev-meta-v">{ev.nivel} · {ev.aforo}</span></li>

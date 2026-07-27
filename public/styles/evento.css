@@ -59,20 +59,7 @@
 }
 .ev-panel__in{ width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 26px; }
 
-.ev-head{ display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
-/* Chip de estado — deja claro de un vistazo si la edición ya pasó */
-.ev-status{
-  display: inline-flex; align-items: center; gap: 9px;
-  padding: 7px 14px; border-radius: 999px;
-  border: 1px solid var(--line);
-  font-size: 9.5px; letter-spacing: .28em; text-transform: uppercase; font-weight: 700;
-  color: var(--ink-soft);
-}
-.ev-status::before{
-  content: ""; width: 6px; height: 6px; border-radius: 50%;
-  background: currentColor; opacity: .55;
-}
-.ev-status.is-celebrado{ background: rgba(31,30,28,.04); }
+.ev-head{ display: flex; flex-direction: column; gap: 14px; }
 .ev-eyebrow{ font-size: 11px; letter-spacing: .34em; text-transform: uppercase; font-weight: 700; color: var(--ev-accent-deep, #9C3020); }
 .ev-title{
   font-weight: 200; font-size: clamp(28px, 3.2vw, 46px); line-height: .98; letter-spacing: -.02em;

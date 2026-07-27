@@ -1,11 +1,17 @@
 /* ── Sección Eventos (home) ──────────────────────────────────────────────
-   Una tarjeta por evento: el cartel entero arriba (sin recortar, como en la
-   página de detalle) y debajo lo esencial + un botón claro de "Ver detalle".
+   Una tarjeta por evento con cartel: el cartel entero arriba (sin recortar,
+   como en la página de detalle), la fecha, lo esencial y un botón claro de
+   "Ver detalle". Las fechas aún sin cerrar van en una banda baja, nunca en
+   una tarjeta con el hueco del cartel vacío.
    La ubicación y el mapa viven ahora en el footer. */
+/* El ancho de columna manda: topar el alto del marco dejaría el cartel
+   flotando con dos bandas de papel a los lados */
 .evt-grid{
-  display:grid; grid-template-columns: repeat(3, 1fr);
+  display:grid; grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   align-items: stretch;
+  max-width: 980px;
+  margin-inline: auto;
 }
 
 .evt-card{
@@ -21,59 +27,28 @@
   box-shadow: 0 24px 50px -34px rgba(0,0,0,.25);
 }
 
-/* Cartel — contenido entero sobre su propio papel */
+/* Cartel — entero sobre su propio papel. object-fit + drop-shadow: la
+   sombra abraza el cartel, no la caja que lo enmarca. */
 .evt-card__poster{
-  position:relative;
   aspect-ratio: 5 / 6;
   display:flex; align-items:center; justify-content:center;
-  padding: 18px;
+  padding: 20px;
   background: linear-gradient(180deg, var(--bg-2), #EFEDE8);
   border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
 }
-/* object-fit + drop-shadow: el cartel se ve entero dentro del marco y la
-   sombra abraza el cartel, no la caja */
 .evt-card__poster img{
   width: 100%; height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 16px 24px rgba(0,0,0,.28));
+  transition: transform .35s ease;
 }
-.evt-card__ph{
-  display:flex; align-items:center; justify-content:center;
-  width: 58%; aspect-ratio: 3 / 4;
-  background: #FFF; border: 1px dashed var(--line);
-  font-size: 9.5px; letter-spacing:.26em; text-transform:uppercase;
-  color: var(--ink-mute); font-weight:600; text-align:center; padding: 12px;
-}
-/* Estado + fecha, en una línea sobre el nombre */
-.evt-card__top{
-  display:flex; align-items:center; gap: 12px; flex-wrap:wrap;
-  margin-bottom: 2px;
-}
-.evt-card__chip{
-  display:inline-flex; align-items:center; gap: 8px;
-  padding: 6px 12px; border-radius: 999px;
-  background: var(--ink); color:#FFF;
-  font-size: 8.5px; letter-spacing:.26em; text-transform:uppercase; font-weight:700;
-  white-space: nowrap;
-}
-.evt-card.is-proximo .evt-card__chip::before{
-  content:""; width:6px; height:6px; border-radius:50%;
-  background: var(--yellow);
-  box-shadow: 0 0 0 3px rgba(217,182,90,.22);
-  animation: pulse 2.4s ease-in-out infinite;
-}
-.evt-card.is-celebrado .evt-card__chip,
-.evt-card.is-soon .evt-card__chip{
-  background: transparent; color: var(--ink-mute);
-  border: 1px solid var(--line);
-}
-@keyframes pulse{
-  0%, 100%{ box-shadow: 0 0 0 3px rgba(217,182,90,.22); }
-  50%    { box-shadow: 0 0 0 6px rgba(217,182,90,.08); }
-}
-.evt-card.is-celebrado .evt-card__poster img{
-  filter: saturate(.85) drop-shadow(0 16px 24px rgba(0,0,0,.22));
-}
+.evt-card__poster:hover img{ transform: scale(1.025); }
+.evt-card__poster:focus-visible{ outline: 2px solid var(--blue); outline-offset: -3px; }
+
+/* El nombre también entra al detalle */
+.evt-card__name a{ color: inherit; transition: color .2s ease; }
+.evt-card__name a:hover{ color: var(--blue); }
 
 /* Cuerpo de la tarjeta */
 .evt-card__body{
@@ -85,8 +60,6 @@
   font-size: 10px; letter-spacing:.34em; text-transform:uppercase;
   font-weight:600; color: var(--blue);
 }
-.evt-card.is-celebrado .evt-card__when{ color: var(--ink-mute); }
-.evt-card.is-soon .evt-card__when{ color: var(--ink-mute); }
 .evt-card__name{
   font-weight: 200;
   font-size: 26px; line-height: 1.05; letter-spacing:-.01em;
@@ -125,30 +98,45 @@
   transform: rotate(45deg);
 }
 .evt-card__btn:hover .arw{ transform: translateX(3px); }
-.evt-card__btn.is-off{
-  background: transparent; color: var(--ink-mute);
-  border: 1px solid var(--line);
-  cursor: default;
-}
-.evt-card__btn.is-off:hover{ background: transparent; transform:none; box-shadow:none; }
-.evt-card.is-celebrado .evt-card__btn{ background: transparent; color: var(--ink); border: 1px solid var(--ink); }
-.evt-card.is-celebrado .evt-card__btn:hover{ background: var(--ink); color: #FFF; }
 
-@media (max-width: 1080px){
-  .evt-grid{ grid-template-columns: repeat(2, 1fr); }
-  .evt-card.is-soon{ grid-column: 1 / -1; }
-  .evt-card.is-soon .evt-card__poster{ aspect-ratio: 16 / 6; }
+/* Banda de "Próximamente" — sin hueco de cartel */
+.evt-soon{
+  max-width: 980px;
+  margin: 18px auto 0;
+  padding: 22px 26px;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  background: var(--bg-2);
+  display:flex; align-items:baseline; gap: 20px; flex-wrap:wrap;
 }
-@media (max-width: 720px){
-  .evt-grid{ grid-template-columns: 1fr; }
-  .evt-card.is-soon .evt-card__poster{ aspect-ratio: 16 / 7; }
-  .evt-card__poster{ aspect-ratio: 5 / 6; padding: 16px; }
+.evt-soon__k{
+  padding: 7px 14px; border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-size: 9px; letter-spacing:.3em; text-transform:uppercase; font-weight:700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.evt-soon__when{
+  font-size: 10.5px; letter-spacing:.34em; text-transform:uppercase;
+  font-weight:600; color: var(--ink-mute);
+}
+.evt-soon__desc{
+  font-size: 13px; line-height:1.6; color: var(--ink-soft);
+  margin-left: auto;
+}
+
+@media (max-width: 880px){
+  .evt-grid{ grid-template-columns: 1fr; max-width: 460px; }
+  .evt-card__poster{ padding: 16px; }
   .evt-card__body{ padding: 20px 18px 22px; }
+  .evt-soon{ flex-direction: column; align-items:flex-start; gap: 12px; padding: 20px 18px; max-width: 460px; }
+  .evt-soon__desc{ margin-left: 0; }
 }
 
 @media (prefers-reduced-motion: reduce){
   .evt-card:hover{ transform:none; }
-  .evt-card.is-proximo .evt-card__chip::before{ animation:none; }
+  .evt-card__poster:hover img{ transform:none; }
   .evt-card__btn:hover{ transform:none; }
   .evt-card__btn:hover .arw{ transform:none; }
 }

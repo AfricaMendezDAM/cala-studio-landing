@@ -143,4 +143,6 @@ form.book{ display:grid; gap: 14px; }
 @media (max-width: 880px){
   .reserve{ grid-template-columns: 1fr; padding: 28px 18px; gap: 22px; }
   .row-2, .row-3{ grid-template-columns: 1fr; }
+  /* La nav inferior fija (80px, z-index 100) tapaba el aviso de "mensaje enviado" */
+  .toast{ bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 16px); z-index: 110; }
 }

@@ -13,6 +13,10 @@ html{ scroll-behavior: smooth; }
   padding-bottom: 80px;
 }
 
+/* Al saltar desde la nav inferior, la top bar fija (56px) se comía el número
+   de sección. Acotado a .m3-app para no afectar al escritorio. */
+.m3-app .section{ scroll-margin-top: 24px; }
+
 /* Top bar — siempre visible, vuelve al inicio al tocarla */
 .m3-topbar{
   position: fixed; top: 0; left: 0; right: 0; z-index: 50;

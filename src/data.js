@@ -98,24 +98,13 @@ export const PRICING = [
   },
 ];
 
-// Tarjetas de la sección Eventos de la home. Cada una con su cartel y un
-// botón explícito de "Ver detalle" que lleva a #/evento/<slug>.
-//   estado: "proximo"   → aún se puede reservar
-//           "celebrado" → ya pasó, la página queda como archivo de la edición
-//           "soon"      → hueco reservado, todavía sin cartel ni página
+// Tarjetas de la sección Eventos de la home, en orden cronológico. Cada
+// cartel lleva su botón de "Ver detalle" a #/evento/<slug>. Solo se anuncia
+// la fecha: si un evento ya pasó, lo dice su propia fecha.
+// La última entrada no tiene cartel todavía → sale como banda "Próximamente".
 export const EVENT_CARDS = [
   {
-    slug: "pilates-and-wine",
-    estado: "proximo",
-    when: "Sábado 8 de agosto",
-    name: "Pilates & Wine",
-    place: "Bodega Casal Fuentes",
-    desc: "Masterclass entre viñas, paseo por la bodega y una copa para brindar",
-    poster: "assets/eventos/pilates-and-wine.png",
-  },
-  {
     slug: "community-sessions-vol-01",
-    estado: "celebrado",
     when: "Viernes 24 de julio",
     name: "Community Sessions",
     place: "Praia de Canelas · Vol. 01",
@@ -123,9 +112,16 @@ export const EVENT_CARDS = [
     poster: "assets/eventos/cartel-community-ed01-2.png",
   },
   {
-    estado: "soon",
+    slug: "pilates-and-wine",
+    when: "Sábado 8 de agosto",
+    name: "Pilates & Wine",
+    place: "Bodega Casal Fuentes",
+    desc: "Masterclass entre viñas, paseo por la bodega y una copa para brindar",
+    poster: "assets/eventos/pilates-and-wine.png",
+  },
+  {
+    proximamente: true,
     when: "Septiembre · 2026",
-    name: "Coming soon",
     desc: "Estamos cerrando la próxima fecha, te la contamos por aquí",
   },
 ];
@@ -173,9 +169,8 @@ export const EVENTOS = {
       accent:     "#6D3738",
       accentDeep: "#53292A",
     },
-    // Edición ya celebrada: la página queda como archivo y el CTA mira a la siguiente
-    estado: "celebrado",
-    estadoLabel: "Edición celebrada",
+    // Edición ya celebrada: no se etiqueta como pasada, lo dice su fecha; el
+    // CTA y la nota al pie miran ya a la siguiente
     cuando: "Viernes 24 de julio",
     hora: "20:30h",
     lugar: "Praia de Canelas, O Grove",

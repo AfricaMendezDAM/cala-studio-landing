@@ -78,15 +78,6 @@ footer .foot-venue__eyebrow{
   font-size: 9.5px; letter-spacing:.4em; text-transform:uppercase;
   color: var(--ink-mute); font-weight:600;
 }
-footer .foot-venue__marks{
-  display:flex; align-items:center; gap: 18px; flex-wrap:wrap;
-}
-footer .foot-venue .v-cala{
-  font-size: 15px; font-weight:600; letter-spacing:.28em; text-transform:uppercase;
-  color: var(--ink); white-space:nowrap;
-}
-footer .foot-venue .v-cala .dot{ color: var(--yellow); margin: 0 3px; }
-footer .foot-venue .v-x{ font-size: 14px; color: var(--ink-mute); font-weight:300; }
 footer .foot-venue .v-melox{ height: 54px; width:auto; display:block; }
 
 footer .foot-map{
