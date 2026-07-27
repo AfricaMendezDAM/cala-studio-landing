@@ -18,22 +18,34 @@ export const GROUPS = [
     tag: "Todos los niveles",
     name: "Pilates",
     nameEm: "Mat",
-    descr: "Suelo. Control postural, respiración y movilidad.",
+    descr: "Trabajo en suelo con tu propio peso · control postural, respiración y movilidad",
     schedule: [
       { day: "Martes", hours: "9:00 — 9:50h"},
       { day: "Jueves", hours: "9:00 — 9:50h"},
-
     ],
   },
   {
     num: "02",
     tag: "Todos los niveles",
     name: "Pilates",
-    nameEm: "Sculpt",
-    descr: "Mat intenso con instrumentos de resistencia. Fuerza funcional sin perder fluidez.",
+    nameEm: "Flow",
+    descr: "Secuencias encadenadas al ritmo de la respiración · movilidad, coordinación y continuidad",
     schedule: [
-      { day: "Martes",  hours: "10:00 — 10:50h"},
-      { day: "Jueves",  hours: "10:00 — 10:50h"}
+      { day: "Lunes",     hours: "9:00 — 9:50h"},
+      { day: "Miércoles", hours: "9:00 — 9:50h"},
+    ],
+  },
+  {
+    num: "03",
+    tag: "Todos los niveles",
+    name: "Pilates",
+    nameEm: "Sculpt",
+    descr: "Mat intenso con instrumentos de resistencia · fuerza funcional sin perder fluidez",
+    schedule: [
+      { day: "Lunes",     hours: "10:00 — 10:50h"},
+      { day: "Martes",    hours: "10:00 — 10:50h"},
+      { day: "Miércoles", hours: "10:00 — 10:50h"},
+      { day: "Jueves",    hours: "10:00 — 10:50h"},
     ],
   },
 ];
@@ -77,7 +89,7 @@ export const PRICING = [
     per: "/ mes",
     items: [
       "8 clases al mes",
-      "Mat + Sculpt combinables",
+      "Mat, Flow y Sculpt combinables",
       "Prioridad en eventos del estudio",
     ],
     cta: "Quiero mi plaza fija",
@@ -145,7 +157,7 @@ export const BONOS = [
     items: [
       "5 clases a usar antes del 31 ago",
       "Mat y material incluidos",
-      "Combinables Mat + Sculpt",
+      "Combinables Mat, Flow y Sculpt",
     ],
     cta: "Quiero este bono",
     href: "#contacto",
@@ -160,7 +172,7 @@ export const BONOS = [
     items: [
       "10 clases a usar antes del 31 ago",
       "Mat y material incluidos",
-      "Combinables Mat + Sculpt",
+      "Combinables Mat, Flow y Sculpt",
       "Prioridad en eventos del estudio",
     ],
     cta: "Quiero este bono",

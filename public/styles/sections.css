@@ -54,7 +54,7 @@
   padding: 26px 26px 22px;
   border-radius: 4px;
   display:flex; flex-direction:column; gap: 14px;
-  grid-column: span 6;
+  grid-column: span 4;
   transition: transform .3s ease, box-shadow .3s ease;
   cursor: pointer;
   color: inherit;
@@ -94,7 +94,7 @@
   padding-top: 14px; border-top: 1px solid var(--line);
 }
 .group-card .schedule .row{
-  display:grid; grid-template-columns: 90px 1fr auto;
+  display:grid; grid-template-columns: 104px 1fr auto;
   gap: 12px; align-items:baseline;
 }
 .group-card .schedule .day{
@@ -111,6 +111,13 @@
   color: var(--ink-mute);
 }
 .group-tabs{ display:none; }
+
+/* Tres tarjetas por fila: en pantallas medianas la fila de horario se aprieta */
+@media (min-width: 881px) and (max-width: 1080px){
+  .group-card{ padding: 22px 20px 20px; }
+  .group-card .schedule .row{ grid-template-columns: 92px 1fr auto; gap: 8px; }
+  .group-card .schedule .day{ letter-spacing: .2em; }
+}
 
 @media (max-width: 880px){
   .group-card{ grid-column: span 12; }

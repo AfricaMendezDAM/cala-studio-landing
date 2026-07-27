@@ -24,6 +24,7 @@ En el panel de Supabase → **SQL Editor** → pega y ejecuta, en orden:
 4. `migrations/0004_reconcile.sql` · `0005_admin.sql` · `0006_admin_guests.sql`  (panel de aforo + PIN)
 5. `migrations/0007_admin_payments.sql`  (registro de pagos: quién debe / quién ha pagado y el qué)
 6. `migrations/0008_waitlist.sql`  (lista de espera: la gente se apunta sola cuando la clase está completa + alta manual en gestión)
+7. `migrations/0009_agosto_flow.sql`  (modalidad Flow + grupos nuevos de lunes y miércoles en agosto)
 
 *Comprobación:* `select count(*) from class_sessions;` debe devolver un número > 0.
 

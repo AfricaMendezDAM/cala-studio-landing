@@ -99,7 +99,8 @@ $$;
 -- ── 6) Semilla de tipos de clase ────────────────────────────────────────
 insert into public.class_types (slug, name, name_em, meta, duration_min, sort_order) values
   ('mat',    'Pilates', 'Mat',    'Suelo · Todos los niveles',       50, 1),
-  ('sculpt', 'Pilates', 'Sculpt', 'Resistencia · Todos los niveles', 50, 2)
+  ('flow',   'Pilates', 'Flow',   'Fluidez · Todos los niveles',     50, 2),
+  ('sculpt', 'Pilates', 'Sculpt', 'Resistencia · Todos los niveles', 50, 3)
 on conflict (slug) do nothing;
 -- cala.studio · Vista de disponibilidad, RPCs y RLS. Correr DESPUÉS de 0001.
 
@@ -286,8 +287,11 @@ create trigger profiles_freeze_admin
 grant select on public.class_types, public.class_sessions to anon, authenticated;
 grant select, insert, update on public.profiles to authenticated;
 grant select on public.bookings to authenticated;
--- cala.studio · Genera las sesiones del calendario
--- Martes y Jueves · Mat 9:00–9:50 · Sculpt 10:00–10:50 · aforo 8
+-- cala.studio · Genera las sesiones del calendario · aforo 8
+--   Lunes     · Flow 9:00–9:50 · Sculpt 10:00–10:50   (desde el 1 de agosto)
+--   Martes    · Mat  9:00–9:50 · Sculpt 10:00–10:50
+--   Miércoles · Flow 9:00–9:50 · Sculpt 10:00–10:50   (desde el 1 de agosto)
+--   Jueves    · Mat  9:00–9:50 · Sculpt 10:00–10:50
 -- Desde HOY hasta el 31 ago 2026. Idempotente (re-ejecutable sin duplicar).
 
 insert into public.class_sessions (class_slug, starts_at, ends_at, capacity)
@@ -297,12 +301,20 @@ select
   ((g.d::date || ' ' || t.start_local)::timestamp at time zone 'Europe/Madrid')
     + (t.dur || ' minutes')::interval,
   8
-from generate_series(current_date, date '2026-08-31', interval '1 day') g(d)
+from generate_series(current_date::timestamp, date '2026-08-31', interval '1 day') g(d)
 cross join (values
-  ('mat',    '09:00', 50),
-  ('sculpt', '10:00', 50)
-) t(slug, start_local, dur)
-where extract(dow from g.d) in (2, 4)   -- 2 = martes, 4 = jueves
+  (1, 'flow',   '09:00', 50),   -- 1 = lunes
+  (1, 'sculpt', '10:00', 50),
+  (2, 'mat',    '09:00', 50),   -- 2 = martes
+  (2, 'sculpt', '10:00', 50),
+  (3, 'flow',   '09:00', 50),   -- 3 = miércoles
+  (3, 'sculpt', '10:00', 50),
+  (4, 'mat',    '09:00', 50),   -- 4 = jueves
+  (4, 'sculpt', '10:00', 50)
+) t(dow, slug, start_local, dur)
+where extract(dow from g.d) = t.dow
+  -- lunes y miércoles son grupos nuevos: arrancan en agosto
+  and (t.dow in (2, 4) or g.d >= date '2026-08-01')
 on conflict (class_slug, starts_at) do nothing;
 -- cala.studio · Reconciliación: porta los datos VIVOS del esquema antiguo
 -- (classes + bookings_legacy, creados por schema.sql) al modelo sessions.

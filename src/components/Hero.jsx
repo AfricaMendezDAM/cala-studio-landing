@@ -55,7 +55,7 @@ export default function Hero() {
           <h1>Pilates<br/>con <em>vistas</em></h1>
           <p className="lede">
             Grupos reducidos, luz natural y sin prisa.<br/>
-            Mat, sculpt y sesiones de amanecer frente al mar.
+            Mat, flow, sculpt y sesiones de amanecer frente al mar.
           </p>
           <div className="actions">
             <a href="#/reservar" className="btn btn-primary">

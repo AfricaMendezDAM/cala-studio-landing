@@ -25,7 +25,7 @@ export default function ReservaPage() {
           <span className="rp-eyebrow">Pilates de costa · Galicia</span>
           <h1 className="rp-title">Reserva tu <em>plaza</em></h1>
           <p className="rp-lede">
-            Martes y jueves, frente al mar<br />
+            De lunes a jueves, frente al mar<br />
             Ocho esterillas, la marea de fondo<br />
             y cincuenta minutos para ti
           </p>

@@ -30,10 +30,10 @@ export default function Grupos() {
     <Section
       id="grupos"
       num="I · Grupos"
-      title={<>Dos métodos <em></em></>}
+      title={<>Tres <em>modalidades</em></>}
       right={<>
-        Grupos cerrados con progresiones de seis semanas: si vienes sin
-        experiencia, empieza por Mat. Si ya practicas, Sculpt es tu sitio.
+        Grupos reducidos, de lunes a jueves: empieza por Mat si vienes sin
+        experiencia, encadena movimiento en Flow y suma resistencia en Sculpt
       </>}
     >
       <div className="group-tabs">
@@ -43,7 +43,7 @@ export default function Grupos() {
             className={"group-tab" + (active === i ? " on" : "")}
             onClick={() => setActive(i)}
           >
-            {g.name} <em>{g.nameEm}</em>
+            <em>{g.nameEm}</em>
           </button>
         ))}
       </div>
