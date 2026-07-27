@@ -98,16 +98,36 @@ export const PRICING = [
   },
 ];
 
-export const EVENT_TEASERS = [
+// Tarjetas de la sección Eventos de la home. Cada una con su cartel y un
+// botón explícito de "Ver detalle" que lleva a #/evento/<slug>.
+//   estado: "proximo"   → aún se puede reservar
+//           "celebrado" → ya pasó, la página queda como archivo de la edición
+//           "soon"      → hueco reservado, todavía sin cartel ni página
+export const EVENT_CARDS = [
   {
-    when: "Agosto · 2026",
-    name: "Pilates & Wine",
-    place: "Viña do Grobe",
-    desc: "Masterclass de pilates, paseo por la viña y picoteo con vino de la zona. Fecha por confirmar.",
-    confirmed: false,
     slug: "pilates-and-wine",
+    estado: "proximo",
+    when: "Sábado 8 de agosto",
+    name: "Pilates & Wine",
+    place: "Bodega Casal Fuentes",
+    desc: "Masterclass entre viñas, paseo por la bodega y una copa para brindar",
+    poster: "assets/eventos/pilates-and-wine.png",
   },
-  { when: "Septiembre · 2026", name: "COMING SOON" },
+  {
+    slug: "community-sessions-vol-01",
+    estado: "celebrado",
+    when: "Viernes 24 de julio",
+    name: "Community Sessions",
+    place: "Praia de Canelas · Vol. 01",
+    desc: "Pilates flow al atardecer sobre la arena, gratis y abierto a todo el mundo",
+    poster: "assets/eventos/cartel-community-ed01-2.png",
+  },
+  {
+    estado: "soon",
+    when: "Septiembre · 2026",
+    name: "Coming soon",
+    desc: "Estamos cerrando la próxima fecha, te la contamos por aquí",
+  },
 ];
 
 // Detalle de cada evento → página dedicada #/evento/<slug>.
@@ -118,7 +138,7 @@ export const EVENTOS = {
     slug: "pilates-and-wine",
     nombre: "Pilates & Wine",
     nombreEm: "& Wine",           // parte en cursiva/acento del titular
-    eyebrow: "Evento de verano · Edición I",
+    eyebrow: "Evento de verano · cala × Viña Dogrobe",
     poster: "assets/eventos/pilates-and-wine.png",
     // Acento propio del evento — tiñe eyebrow, título, precio y CTA para
     // armonizar con el cartel. El fondo va siempre en blanco roto.
@@ -127,7 +147,7 @@ export const EVENTOS = {
       accentDeep: "#9C3020",
     },
     // Datos alineados con el cartel — nada que se contradiga
-    cuando: "Sábado 15 de agosto",
+    cuando: "Sábado 8 de agosto",
     hora: "10:30h",
     lugar: "Bodega Casal Fuentes",
     precio: "35€",
@@ -139,7 +159,36 @@ export const EVENTOS = {
     // Programa breve (lo que ya anuncia el cartel, en una línea)
     programa: "Masterclass de pilates · aperitivo con vino · paseo por las viñas",
     // CTA de reserva — abre WhatsApp con el mensaje ya escrito
-    reservaMsg: "Hola! Quiero reservar plaza para Pilates & Wine (sábado 15 de agosto)",
+    reservaMsg: "Hola! Quiero reservar plaza para Pilates & Wine (sábado 8 de agosto)",
+  },
+
+  "community-sessions-vol-01": {
+    slug: "community-sessions-vol-01",
+    nombre: "Community Sessions",
+    nombreEm: "Sessions",
+    eyebrow: "Community Sessions · Vol. 01",
+    poster: "assets/eventos/cartel-community-ed01-2.png",
+    // Granate y crema del cartel — el fondo sigue siendo blanco roto
+    tema: {
+      accent:     "#6D3738",
+      accentDeep: "#53292A",
+    },
+    // Edición ya celebrada: la página queda como archivo y el CTA mira a la siguiente
+    estado: "celebrado",
+    estadoLabel: "Edición celebrada",
+    cuando: "Viernes 24 de julio",
+    hora: "20:30h",
+    lugar: "Praia de Canelas, O Grove",
+    precio: "Gratis",
+    precioNota: "actividad abierta",
+    nivel: "Todos los niveles",
+    aforo: "Trae tu esterilla",
+    lede: "Una tarde de viernes en la arena, la esterilla mirando al mar y la luz cayendo",
+    descripcion: "Las Community Sessions nacen para sacar el pilates del estudio y llevarlo a donde ya está la gente en verano: la playa, el atardecer, el rato de después. La Vol. 01 juntó esterillas en Canelas para movernos al aire libre, sin niveles ni compromiso, y quedarnos viendo cómo se iba la luz",
+    programa: "Pilates flow al aire libre · movimiento, respiración y conexión",
+    ctaLabel: "Avisadme de la Vol. 02",
+    reservaMsg: "Hola! Quiero que me aviséis de la próxima Community Session",
+    fine: "La Vol. 02 ya está en camino",
   },
 };
 

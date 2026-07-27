@@ -4,7 +4,7 @@ import Nav from "./components/Nav.jsx";
 import Hero from "./components/Hero.jsx";
 import Grupos from "./components/Grupos.jsx";
 import Tarifas from "./components/Tarifas.jsx";
-import EventosUbicacion from "./components/EventosUbicacion.jsx";
+import Eventos from "./components/Eventos.jsx";
 import Contacto from "./components/Contacto.jsx";
 import Footer from "./components/Footer.jsx";
 import ReservaPage from "./components/ReservaPage.jsx";
@@ -45,7 +45,7 @@ export default function App() {
           <Hero />
           <Grupos />
           <Tarifas />
-          <EventosUbicacion />
+          <Eventos />
           <Contacto />
           <Footer />
         </main>
@@ -60,7 +60,7 @@ export default function App() {
       <Hero />
       <Grupos />
       <Tarifas />
-      <EventosUbicacion />
+      <Eventos />
       <Contacto />
       <Footer />
     </>
