@@ -25,6 +25,7 @@ En el panel de Supabase → **SQL Editor** → pega y ejecuta, en orden:
 5. `migrations/0007_admin_payments.sql`  (registro de pagos: quién debe / quién ha pagado y el qué)
 6. `migrations/0008_waitlist.sql`  (lista de espera: la gente se apunta sola cuando la clase está completa + alta manual en gestión)
 7. `migrations/0009_agosto_flow.sql`  (modalidad Flow + grupos nuevos de lunes y miércoles en agosto)
+8. `migrations/0010_eventos_agotado.sql`  (los eventos entran en el calendario y en gestión · botón de "completo" · email en la lista de espera)
 
 *Comprobación:* `select count(*) from class_sessions;` debe devolver un número > 0.
 
@@ -63,6 +64,19 @@ En el proyecto de Vercel → **Settings → Environment Variables** añade
 - `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (paso 1).
 - Con eso conecto el calendario en vivo, el flujo de reserva y el login.
 - El `RESEND_API_KEY` y el `OWNER_EMAIL` van solo en los secretos de la función (paso 4): **nunca en el frontend**, así que esos configúralos tú en Supabase.
+
+## Eventos (Pilates & Wine y los que vengan)
+- Cada evento vive en `class_sessions` con `category = 'evento'` y un **`evento_slug`**
+  igual al de su página (`#/evento/<slug>`). Ese slug es lo que ata la página al calendario:
+  la página lee de ahí si quedan plazas y a qué lista de espera apunta a la gente.
+- **Plazas:** se cambian desde el panel (`#/gestion` → abre el evento → *Plazas*). El evento
+  de agosto arranca con 12 hasta que decidas el número.
+- **Marcar como completo:** en ese mismo panel, *Marcar como completo*. En la web desaparece el
+  botón de reservar, sale **Agotado** y quien entre deja nombre y apellidos, teléfono y email.
+  Esos contactos salen en el panel bajo *Lista de espera* (con `→ A la clase` si liberas plaza).
+  Se reabre cuando quieras con *Reabrir reservas*.
+- **Añadir un evento nuevo:** copia el bloque final de `0010_eventos_agotado.sql` cambiando
+  título, fecha y `evento_slug`, y añade su ficha a `EVENTOS` en `src/data.js` con el mismo slug.
 
 ## Notas
 - **Aforo atómico:** reservar pasa siempre por la función `book_session`, que bloquea la

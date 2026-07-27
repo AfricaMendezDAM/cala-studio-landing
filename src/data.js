@@ -156,6 +156,8 @@ export const EVENTOS = {
     programa: "Masterclass de pilates · aperitivo con vino · paseo por las viñas",
     // CTA de reserva — abre WhatsApp con el mensaje ya escrito
     reservaMsg: "Hola! Quiero reservar plaza para Pilates & Wine (sábado 8 de agosto)",
+    // Texto con el que se comparte la página (WhatsApp, Instagram, nativo)
+    compartirMsg: "Pilates & Wine · sábado 8 de agosto entre viñas\nTe vienes?",
   },
 
   "community-sessions-vol-01": {
@@ -183,8 +185,25 @@ export const EVENTOS = {
     programa: "Pilates flow al aire libre · movimiento, respiración y conexión",
     ctaLabel: "Avisadme de la Vol. 02",
     reservaMsg: "Hola! Quiero que me aviséis de la próxima Community Session",
+    compartirMsg: "Community Sessions · pilates al atardecer en la playa\nMira qué plan",
     fine: "La Vol. 02 ya está en camino",
   },
+};
+
+// Copy del evento COMPLETO. Cuando la dueña marca el evento como completo en el
+// panel de gestión, la página cambia el botón de reservar por esto: el cartel de
+// agotado y un formulario para dejar el contacto (nombre y apellidos, teléfono
+// y email) y ser de las primeras en enterarse.
+export const EVENTO_AGOTADO = {
+  tag: "Agotado",
+  nota: "Las plazas de esta edición están completas",
+  esperaAbrir: "Avisadme si se libera una plaza",
+  esperaTitulo: "Lista de espera",
+  esperaLede: "Déjanos tu contacto\nTe escribimos si se libera una plaza y serás de las primeras en enterarte de la próxima fecha",
+  esperaBoton: "Apuntarme",
+  esperaOk: "✓ Te tenemos apuntada",
+  esperaOkNota: "Te avisamos si se libera una plaza o en cuanto abramos la próxima fecha",
+  esperaError: "No se pudo apuntar, inténtalo de nuevo",
 };
 
 export function getEvento(slug) {

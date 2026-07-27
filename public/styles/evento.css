@@ -106,6 +106,76 @@
 @keyframes ev-nudge{ 50%{ transform: translateX(3px); } }
 .ev-fine{ color: var(--ink-soft); font-size: 11.5px; letter-spacing: .04em; }
 
+/* Comprobando el aforo: el botón está, pero aún no lleva a ningún sitio */
+.ev-cta.is-cargando{ opacity: .5; pointer-events: none; box-shadow: none; }
+
+/* CTA secundario (abrir la lista de espera): mismo gesto, sin relleno */
+.ev-cta-ghost{
+  background: transparent; color: var(--ev-accent-deep, #9C3020);
+  border: 1px solid var(--ev-accent, #C1402E); box-shadow: none;
+}
+.ev-cta-ghost:hover{ background: var(--ev-accent-deep, #9C3020); color: #fff; box-shadow: none; }
+
+/* ── Evento completo ────────────────────────────────────────────────── */
+.ev-reserva.is-agotado .ev-precio{ color: var(--ink-mute); }
+.ev-agotado{ display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.ev-agotado-tag{
+  display: inline-flex; align-items: center; padding: 9px 18px; border-radius: 999px;
+  background: var(--ink); color: #fff;
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase; font-weight: 700;
+}
+.ev-agotado-nota{ font-size: 13px; color: var(--ink-soft); }
+
+/* Formulario de lista de espera / aviso de la próxima fecha */
+.ev-wl{ display: flex; flex-direction: column; gap: 12px; }
+.ev-wl-title{ font-size: 10px; letter-spacing: .26em; text-transform: uppercase; font-weight: 700; color: var(--ev-accent-deep, #9C3020); }
+.ev-wl-lede{ font-size: 13px; line-height: 1.6; color: var(--ink-soft); max-width: 40ch; }
+.ev-wl-fields{ display: flex; flex-wrap: wrap; gap: 8px; }
+.ev-wl-f{
+  flex: 1 1 150px; min-width: 0; padding: 12px 16px;
+  background: #fff; border: 1px solid var(--line); border-radius: 999px;
+  font-size: 14px; font-family: inherit; color: var(--ink);
+}
+.ev-wl-f.wide{ flex-basis: 100%; }
+.ev-wl-f:focus{ outline: none; border-color: var(--ev-accent, #C1402E); }
+.ev-wl-b{
+  align-self: flex-start; padding: 14px 30px; border-radius: 999px; border: 0;
+  background: var(--ev-accent-deep, #9C3020); color: #fff; font-family: inherit; cursor: pointer;
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700;
+  transition: background .2s, opacity .2s;
+}
+.ev-wl-b:hover:not(:disabled){ background: var(--ev-accent, #C1402E); }
+.ev-wl-b:disabled{ opacity: .45; cursor: default; }
+.ev-wl-err{ font-size: 12px; color: #B8472D; }
+.ev-wl-done{
+  font-size: 13.5px; font-weight: 600; letter-spacing: .04em; color: var(--ev-accent-deep, #9C3020);
+}
+.ev-wl-done span{ display: block; margin-top: 4px; font-weight: 400; letter-spacing: 0; color: var(--ink-soft); }
+
+/* ── Compartir el evento ────────────────────────────────────────────── */
+.ev-share{
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 4px; padding-top: 18px; border-top: 1px solid var(--line-soft);
+}
+.ev-share-k{ font-size: 9.5px; letter-spacing: .26em; text-transform: uppercase; font-weight: 700; color: var(--ink-mute); }
+.ev-share-row{ display: flex; flex-wrap: wrap; gap: 8px; }
+.ev-share-b{
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px;
+  border-radius: 999px; border: 1px solid var(--line); background: transparent;
+  color: var(--ink-soft); font-family: inherit; cursor: pointer;
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
+  transition: color .2s, border-color .2s, background .2s;
+}
+.ev-share-b svg{ width: 15px; height: 15px; flex: none; }
+.ev-share-b:hover{ color: var(--ev-accent-deep, #9C3020); border-color: var(--ev-accent, #C1402E); background: #fff; }
+
+.ev-toast{
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: #fff; padding: 12px 22px; border-radius: 999px;
+  font-size: 12px; letter-spacing: .04em; z-index: 60; max-width: calc(100vw - 32px); text-align: center;
+  box-shadow: 0 20px 40px -20px rgba(0,0,0,.5);
+}
+
 /* ── Evento inexistente ─────────────────────────────────────────────── */
 .ev-404{ display: grid; place-items: center; padding: 40px; }
 .ev-404-in{ display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }

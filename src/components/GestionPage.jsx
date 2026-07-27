@@ -108,14 +108,44 @@ export default function GestionPage() {
     await Promise.all([loadGuests(sessionId), load()]);
   };
 
-  const addWait = async (sessionId, nombre, telefono) => {
+  const addWait = async (sessionId, nombre, telefono, email) => {
     setBusy(true);
     const { error } = await supabase.rpc("admin_add_waitlist", {
-      p_session_id: sessionId, p_nombre: nombre, p_telefono: telefono || null, p_pin: pin,
+      p_session_id: sessionId, p_nombre: nombre, p_telefono: telefono || null,
+      p_email: email || null, p_pin: pin,
     });
     setBusy(false);
     if (error) { toast("No se pudo apuntar a la lista de espera"); return false; }
     await Promise.all([loadWaits(sessionId), load()]);
+    return true;
+  };
+
+  // Marcar como COMPLETO sin tocar el aforo: la web deja de ofrecer reserva y
+  // enseña "Agotado" con la lista de espera. Se puede reabrir cuando quieras.
+  const setSoldOut = async (sessionId, value) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_set_sold_out", {
+      p_session_id: sessionId, p_sold_out: value, p_pin: pin,
+    });
+    setBusy(false);
+    if (error) { toast("No se pudo cambiar el estado"); return; }
+    await load();
+  };
+
+  // Nº de plazas de una sesión (útil en eventos, donde el aforo se cierra tarde)
+  const setCapacity = async (sessionId, capacity) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_set_capacity", {
+      p_session_id: sessionId, p_capacity: capacity, p_pin: pin,
+    });
+    setBusy(false);
+    if (error) {
+      toast(/AFORO_MENOR/.test(error.message)
+        ? "Hay más personas apuntadas que plazas"
+        : "No se pudo cambiar el aforo");
+      return false;
+    }
+    await load();
     return true;
   };
 
@@ -202,8 +232,10 @@ export default function GestionPage() {
                 <section key={day.key} className="gp-day">
                   <h3 className="gp-date">{day.label}</h3>
                   {day.items.map(s => {
-                    const nombre = s.category === "evento" ? s.titulo : `${s.name} ${s.name_em}`;
-                    const full = s.spots_left <= 0;
+                    const esEvento = s.category === "evento";
+                    const nombre = esEvento ? s.titulo : `${s.name} ${s.name_em}`;
+                    const lleno   = s.spots_left <= 0;   // aforo lleno de verdad
+                    const cerrado = s.is_full;           // completo de cara al público
                     const open = openId === s.session_id;
                     return (
                       <div key={s.session_id} className={"gp-item" + (open ? " open" : "")}>
@@ -211,13 +243,14 @@ export default function GestionPage() {
                           <span className="gp-when">
                             <b>{HORA.format(new Date(s.starts_at))}</b>
                             <span>{nombre}</span>
+                            {esEvento && <span className="gp-evento-k">Evento</span>}
                           </span>
                           <span className="gp-ctrl">
                             {s.waitlist_count > 0 && (
                               <span className="gp-wl-badge">{s.waitlist_count} en espera</span>
                             )}
-                            <span className={"gp-count" + (full ? " full" : "")}>
-                              {full ? "Completo" : `${s.reservadas}/${s.capacity}`}
+                            <span className={"gp-count" + (cerrado ? " full" : "")}>
+                              {cerrado ? "Completo" : `${s.reservadas}/${s.capacity}`}
                             </span>
                             <span className="gp-caret" aria-hidden="true">▾</span>
                           </span>
@@ -226,14 +259,18 @@ export default function GestionPage() {
                           <GuestPanel
                             list={guests[s.session_id]}
                             waitlist={waits[s.session_id]}
-                            full={full}
+                            full={lleno}
+                            soldOut={!!s.sold_out}
+                            capacity={s.capacity}
                             busy={busy}
                             onAdd={(n, t) => addGuest(s.session_id, n, t)}
                             onUpdate={(gid, n, t) => updateGuest(s.session_id, gid, n, t)}
                             onRemove={(gid) => removeGuest(s.session_id, gid)}
-                            onWaitAdd={(n, t) => addWait(s.session_id, n, t)}
+                            onWaitAdd={(n, t, m) => addWait(s.session_id, n, t, m)}
                             onWaitRemove={(wid) => removeWait(s.session_id, wid)}
                             onPromote={(w) => promoteWait(s.session_id, w)}
+                            onSoldOut={(v) => setSoldOut(s.session_id, v)}
+                            onCapacity={(n) => setCapacity(s.session_id, n)}
                           />
                         )}
                       </div>
@@ -251,7 +288,9 @@ export default function GestionPage() {
   );
 }
 
-function GuestPanel({ list, waitlist, full, busy, onAdd, onUpdate, onRemove, onWaitAdd, onWaitRemove, onPromote }) {
+function GuestPanel({ list, waitlist, full, soldOut, capacity, busy,
+                     onAdd, onUpdate, onRemove, onWaitAdd, onWaitRemove, onPromote,
+                     onSoldOut, onCapacity }) {
   const [nombre, setNombre] = useState("");
   const [tel, setTel]       = useState("");
 
@@ -264,6 +303,9 @@ function GuestPanel({ list, waitlist, full, busy, onAdd, onUpdate, onRemove, onW
 
   return (
     <div className="gp-panel">
+      <CapacityBar capacity={capacity} soldOut={soldOut} busy={busy}
+                   onSoldOut={onSoldOut} onCapacity={onCapacity} />
+
       {list === "loading" || list === undefined ? (
         <div className="gp-panel-load">Cargando…</div>
       ) : list.length === 0 ? (
@@ -279,7 +321,7 @@ function GuestPanel({ list, waitlist, full, busy, onAdd, onUpdate, onRemove, onW
       )}
 
       {full ? (
-        <p className="gp-full-note">Clase completa</p>
+        <p className="gp-full-note">No quedan plazas</p>
       ) : (
         <form className="gp-add" onSubmit={submit}>
           <input className="gp-add-nombre" placeholder="Nombre" value={nombre}
@@ -296,17 +338,58 @@ function GuestPanel({ list, waitlist, full, busy, onAdd, onUpdate, onRemove, onW
   );
 }
 
+// Plazas de la sesión y botón de COMPLETO. Marcar como completo no toca el
+// aforo: solo cierra la reserva en la web (sale "Agotado" y la gente deja su
+// contacto). Aquí dentro puedes seguir apuntando a mano mientras queden plazas.
+function CapacityBar({ capacity, soldOut, busy, onSoldOut, onCapacity }) {
+  const [val, setVal] = useState(String(capacity ?? ""));
+  useEffect(() => { setVal(String(capacity ?? "")); }, [capacity]);
+
+  const n = Number(val);
+  const changed = val.trim() !== "" && Number.isInteger(n) && n >= 1 && n !== capacity;
+
+  const save = async (e) => {
+    e.preventDefault();
+    if (!changed) return;
+    const ok = await onCapacity(n);
+    if (!ok) setVal(String(capacity ?? ""));
+  };
+
+  return (
+    <div className="gp-cap">
+      <form className="gp-cap-form" onSubmit={save}>
+        <span className="gp-cap-k">Plazas</span>
+        <input className="gp-cap-f" type="number" inputMode="numeric" min="1" max="200"
+               value={val} onChange={e => setVal(e.target.value)} aria-label="Número de plazas" />
+        {changed && <button className="gp-cap-save" disabled={busy}>Guardar</button>}
+      </form>
+
+      <button type="button" className={"gp-soldout" + (soldOut ? " on" : "")}
+              disabled={busy} onClick={() => onSoldOut(!soldOut)}>
+        {soldOut ? "↺ Reabrir reservas" : "✕ Marcar como completo"}
+      </button>
+
+      {soldOut && (
+        <p className="gp-cap-note">
+          En la web sale <b>Agotado</b> · quien entre deja su contacto para la lista de espera
+        </p>
+      )}
+    </div>
+  );
+}
+
 // Lista de espera de una clase: quién se ha apuntado (por la web o a mano),
 // alta manual, quitar, y "pasar a la clase" cuando se libera una plaza.
 function WaitlistPanel({ list, full, busy, onAdd, onRemove, onPromote }) {
   const [nombre, setNombre] = useState("");
   const [tel, setTel]       = useState("");
+  const [email, setEmail]   = useState("");
 
   const submit = async (e) => {
     e.preventDefault();
     if (!nombre.trim()) return;
-    const ok = await onAdd(nombre.trim(), tel.trim());
-    if (ok) { setNombre(""); setTel(""); }
+    const ok = await onAdd(nombre.trim(), tel.trim(), email.trim());
+    if (ok) { setNombre(""); setTel(""); setEmail(""); }
   };
 
   const count = Array.isArray(list) ? list.length : 0;
@@ -326,10 +409,17 @@ function WaitlistPanel({ list, full, busy, onAdd, onRemove, onPromote }) {
         <ul className="gp-wl-list">
           {list.map(w => (
             <li key={w.id} className="gp-wl-item">
-              <span className="gp-wl-name">{w.nombre}</span>
-              {w.telefono
-                ? <a className="gp-wl-tel" href={`tel:${w.telefono}`}>{w.telefono}</a>
-                : <span className="gp-wl-tel none">sin teléfono</span>}
+              <div className="gp-wl-who">
+                <span className="gp-wl-name">{w.nombre}</span>
+                <span className="gp-wl-contacto">
+                  {w.telefono
+                    ? <a className="gp-wl-tel" href={`tel:${w.telefono}`}>{w.telefono}</a>
+                    : <span className="gp-wl-tel none">sin teléfono</span>}
+                  {w.email
+                    ? <a className="gp-wl-mail" href={`mailto:${w.email}`}>{w.email}</a>
+                    : <span className="gp-wl-mail none">sin email</span>}
+                </span>
+              </div>
               {!full && (
                 <button type="button" className="gp-wl-promote" disabled={busy}
                         onClick={() => onPromote(w)}>→ A la clase</button>
@@ -344,8 +434,10 @@ function WaitlistPanel({ list, full, busy, onAdd, onRemove, onPromote }) {
       <form className="gp-add gp-wl-add" onSubmit={submit}>
         <input className="gp-add-nombre" placeholder="Nombre y apellidos" value={nombre}
                autoComplete="off" onChange={e => setNombre(e.target.value)} />
-        <input className="gp-add-tel" type="tel" inputMode="tel" placeholder="Teléfono (opcional)"
+        <input className="gp-add-tel" type="tel" inputMode="tel" placeholder="Teléfono"
                autoComplete="off" value={tel} onChange={e => setTel(e.target.value)} />
+        <input className="gp-add-mail" type="email" inputMode="email" placeholder="Email"
+               autoComplete="off" value={email} onChange={e => setEmail(e.target.value)} />
         <button className="gp-add-b" disabled={busy || !nombre.trim()}>A la espera</button>
       </form>
     </div>

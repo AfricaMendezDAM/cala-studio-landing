@@ -97,6 +97,14 @@
 .rp-fine{ text-align: center; color: var(--ink-mute); font-size: 11px; letter-spacing: .06em; }
 .rp-fine em{ font-style: italic; color: var(--blue); }
 
+/* Enlace al detalle del evento desde el desglose del día */
+.dp-detalle{
+  align-self: flex-start; margin-top: 2px; padding-bottom: 1px;
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600;
+  color: var(--blue); border-bottom: 1px solid var(--line); transition: color .2s, border-color .2s;
+}
+.dp-detalle:hover{ color: var(--ink); border-color: var(--ink); }
+
 /* ── Lista de espera (cuando la clase está completa) ──────────────────── */
 .dp-wl-open{
   margin-top: 2px; padding: 0 0 1px; background: none; border: 0; cursor: pointer; font: inherit;

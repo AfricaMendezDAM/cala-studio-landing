@@ -150,6 +150,52 @@
 .gp-add-b:hover:not(:disabled){ background: var(--blue); border-color: var(--blue); }
 .gp-add-b:disabled{ opacity: .5; cursor: default; }
 
+/* Alta manual en la espera: nombre y teléfono arriba, email y botón debajo */
+.gp-wl-add .gp-add-nombre,
+.gp-wl-add .gp-add-tel{ flex: 1 1 calc(50% - 4px); }
+.gp-wl-add .gp-add-mail{ flex: 1 1 200px; }
+.gp-wl-add .gp-add-b{ flex: 0 1 auto; }
+
+/* ── Plazas y "marcar como completo" ─────────────────────────────────── */
+.gp-cap{
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  padding: 10px 12px; margin-bottom: 14px;
+  background: var(--bg-2); border-radius: 12px;
+}
+.gp-cap-form{ display: flex; align-items: center; gap: 8px; }
+.gp-cap-k{ font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+.gp-cap-f{
+  width: 68px; padding: 8px 12px; text-align: center;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
+  font-size: 14px; font-family: inherit; color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.gp-cap-f:focus{ outline: none; border-color: var(--blue); }
+.gp-cap-save{
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--ink); background: var(--ink); color: #fff;
+  font-family: inherit; cursor: pointer;
+  font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600;
+  transition: background .2s, border-color .2s;
+}
+.gp-cap-save:hover:not(:disabled){ background: var(--blue); border-color: var(--blue); }
+.gp-cap-save:disabled{ opacity: .5; cursor: default; }
+.gp-soldout{
+  margin-left: auto; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--ink-soft); font-family: inherit; cursor: pointer;
+  font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.gp-soldout:hover:not(:disabled){ background: var(--ink); border-color: var(--ink); color: #fff; }
+.gp-soldout.on{ background: var(--ink); border-color: var(--ink); color: #fff; }
+.gp-soldout.on:hover:not(:disabled){ background: var(--blue); border-color: var(--blue); }
+.gp-soldout:disabled{ opacity: .5; cursor: default; }
+.gp-cap-note{ flex: 1 1 100%; font-size: 11.5px; color: var(--ink-mute); }
+.gp-cap-note b{ font-weight: 600; color: var(--ink-soft); }
+
+.gp-evento-k{
+  flex: none; font-size: 8.5px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700;
+  color: var(--blue); background: rgba(47,107,150,.1); padding: 3px 8px; border-radius: 999px;
+}
+
 /* ── Lista de espera dentro del panel de una clase ───────────────────── */
 .gp-wl-badge{
   font-size: 9px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700;
@@ -170,10 +216,16 @@
   padding: 9px 2px; border-bottom: 1px dashed var(--line-soft);
 }
 .gp-wl-item:last-child{ border-bottom: 0; }
-.gp-wl-name{ flex: 1; min-width: 0; font-size: 14px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gp-wl-who{ flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.gp-wl-name{ min-width: 0; font-size: 14px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gp-wl-contacto{ display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; min-width: 0; }
 .gp-wl-tel{ font-size: 13px; color: var(--blue); font-variant-numeric: tabular-nums; }
 .gp-wl-tel:hover{ text-decoration: underline; }
 .gp-wl-tel.none{ color: var(--ink-mute); font-style: italic; }
+/* El email se parte si es largo: mejor dos líneas que un contacto a medias */
+.gp-wl-mail{ font-size: 12.5px; color: var(--blue); min-width: 0; overflow-wrap: anywhere; }
+.gp-wl-mail:hover{ text-decoration: underline; }
+.gp-wl-mail.none{ color: var(--ink-mute); font-style: italic; }
 .gp-wl-promote{
   flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line);
   background: transparent; color: var(--ink-soft); font-family: inherit; cursor: pointer;

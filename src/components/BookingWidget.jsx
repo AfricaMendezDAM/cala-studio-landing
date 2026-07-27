@@ -23,6 +23,7 @@ function WaitlistJoin({ sessionId }) {
   const [nombre, setNombre]       = useState("");
   const [apellidos, setApellidos] = useState("");
   const [tel, setTel]             = useState("");
+  const [email, setEmail]         = useState("");
   const [state, setState]         = useState("idle"); // idle | sending | done | error
 
   const ready = nombre.trim() && apellidos.trim();
@@ -33,7 +34,8 @@ function WaitlistJoin({ sessionId }) {
     setState("sending");
     const nombreCompleto = `${nombre.trim()} ${apellidos.trim()}`;
     const { error } = await supabase.rpc("waitlist_join", {
-      p_session_id: sessionId, p_nombre: nombreCompleto, p_telefono: tel.trim() || null,
+      p_session_id: sessionId, p_nombre: nombreCompleto,
+      p_telefono: tel.trim() || null, p_email: email.trim() || null,
     });
     setState(error ? "error" : "done");
   };
@@ -59,6 +61,8 @@ function WaitlistJoin({ sessionId }) {
              value={apellidos} onChange={e => setApellidos(e.target.value)} />
       <input className="dp-wl-f" type="tel" inputMode="tel" placeholder="Teléfono (opcional)"
              autoComplete="tel" value={tel} onChange={e => setTel(e.target.value)} />
+      <input className="dp-wl-f" type="email" inputMode="email" placeholder="Email (opcional)"
+             autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
       <button className="dp-wl-b" disabled={!ready || state === "sending"}>
         {state === "sending" ? "…" : "Apuntarme"}
       </button>
@@ -70,7 +74,8 @@ function WaitlistJoin({ sessionId }) {
 function DayItem({ c, now, dateLabel }) {
   const isEvent = c.kind === "event";
   const isPast  = c.start.getTime() < now;
-  const isFull  = c.free <= 0;
+  // "Completo" es lo que dice el calendario: aforo lleno o marcado a mano en gestión
+  const isFull  = c.full;
   const isTight = !isFull && c.free <= 2;
   const nombre  = isEvent ? c.type.name : `${c.type.name} ${c.type.nameEm}`;
   const verbo   = isEvent ? "apuntarme a" : "reservar";
@@ -97,6 +102,9 @@ function DayItem({ c, now, dateLabel }) {
             <span className="dp-kind">Evento</span>
             <h4>{c.type.name}</h4>
             {c.descripcion && <p className="dp-desc">{c.descripcion}</p>}
+            {c.eventoSlug && (
+              <a className="dp-detalle" href={`#/evento/${c.eventoSlug}`}>Ver el cartel y el plan →</a>
+            )}
           </>
         ) : (
           <h4>{c.type.name} <em>{c.type.nameEm}</em></h4>
@@ -142,7 +150,8 @@ export default function BookingWidget() {
         kind: r.category === "evento" ? "event" : "class",
         type: { name: r.name, nameEm: r.name_em, meta: r.meta },
         descripcion: r.descripcion,
-        capacity: r.capacity, free: r.spots_left,
+        eventoSlug: r.evento_slug,
+        capacity: r.capacity, free: r.spots_left, full: !!r.is_full,
         start, end,
         durationMin: Math.round((end - start) / 60000),
         timeStart: HORA.format(start),
