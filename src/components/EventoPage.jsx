@@ -302,17 +302,15 @@ export default function EventoPage({ slug }) {
                 <ListaEspera sessionId={ses.session_id} />
               </>
             ) : (
-              <>
-                {/* Mientras se comprueba el aforo el botón espera: así nadie se va
-                    a WhatsApp a reservar un evento que está agotado */}
-                <a className={"ev-cta" + (cargando ? " is-cargando" : "")} href={waHref}
-                   target="_blank" rel="noopener" aria-disabled={cargando || undefined}
-                   onClick={e => { if (cargando) e.preventDefault(); }}>
-                  {cargando ? "Comprobando plazas…" : (ev.ctaLabel || "Reservar por WhatsApp")}
-                  <span className="ev-cta-arw" aria-hidden="true" />
-                </a>
-                <p className="ev-fine">{ev.fine || "Plazas limitadas"}</p>
-              </>
+              /* El botón va solo, sin letra pequeña debajo. Mientras se comprueba
+                 el aforo espera: así nadie se va a WhatsApp a reservar un evento
+                 que está agotado */
+              <a className={"ev-cta" + (cargando ? " is-cargando" : "")} href={waHref}
+                 target="_blank" rel="noopener" aria-disabled={cargando || undefined}
+                 onClick={e => { if (cargando) e.preventDefault(); }}>
+                {cargando ? "Comprobando plazas…" : (ev.ctaLabel || "Reservar por WhatsApp")}
+                <span className="ev-cta-arw" aria-hidden="true" />
+              </a>
             )}
 
             <ShareRow url={pageUrl} texto={shareText} onAviso={toast} />

@@ -172,7 +172,7 @@ export const EVENTOS = {
       accentDeep: "#53292A",
     },
     // Edición ya celebrada: no se etiqueta como pasada, lo dice su fecha; el
-    // CTA y la nota al pie miran ya a la siguiente
+    // CTA mira ya a la siguiente
     cuando: "Viernes 24 de julio",
     hora: "20:30h",
     lugar: "Praia de Canelas, O Grove",
@@ -186,7 +186,6 @@ export const EVENTOS = {
     ctaLabel: "Avisadme de la Vol. 02",
     reservaMsg: "Hola! Quiero que me aviséis de la próxima Community Session",
     compartirMsg: "Community Sessions · pilates al atardecer en la playa\nMira qué plan",
-    fine: "La Vol. 02 ya está en camino",
   },
 };
 
