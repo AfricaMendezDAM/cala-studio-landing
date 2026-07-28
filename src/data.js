@@ -31,8 +31,8 @@ export const GROUPS = [
     nameEm: "Flow",
     descr: "Secuencias encadenadas al ritmo de la respiración · movilidad, coordinación y continuidad",
     schedule: [
-      { day: "Lunes",     hours: "9:00 — 9:50h"},
-      { day: "Miércoles", hours: "9:00 — 9:50h"},
+      { day: "Lunes",     hours: "10:00 — 10:50h"},
+      { day: "Miércoles", hours: "10:00 — 10:50h"},
     ],
   },
   {
@@ -42,9 +42,9 @@ export const GROUPS = [
     nameEm: "Sculpt",
     descr: "Mat intenso con instrumentos de resistencia · fuerza funcional sin perder fluidez",
     schedule: [
-      { day: "Lunes",     hours: "10:00 — 10:50h"},
+      { day: "Lunes",     hours: "9:00 — 9:50h"},
       { day: "Martes",    hours: "10:00 — 10:50h"},
-      { day: "Miércoles", hours: "10:00 — 10:50h"},
+      { day: "Miércoles", hours: "9:00 — 9:50h"},
       { day: "Jueves",    hours: "10:00 — 10:50h"},
     ],
   },
