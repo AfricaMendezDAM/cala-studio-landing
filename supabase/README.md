@@ -26,6 +26,7 @@ En el panel de Supabase → **SQL Editor** → pega y ejecuta, en orden:
 6. `migrations/0008_waitlist.sql`  (lista de espera: la gente se apunta sola cuando la clase está completa + alta manual en gestión)
 7. `migrations/0009_agosto_flow.sql`  (modalidad Flow + grupos nuevos de lunes y miércoles en agosto)
 8. `migrations/0010_eventos_agotado.sql`  (los eventos entran en el calendario y en gestión · botón de "completo" · email en la lista de espera)
+9. `migrations/0011_bonos_recuperaciones.sql`  (bonos: quién gasta qué clase y cuántas le quedan · recuperaciones pendientes · mueve Pilates & Wine al 15 de agosto)
 
 *Comprobación:* `select count(*) from class_sessions;` debe devolver un número > 0.
 
@@ -77,6 +78,15 @@ En el proyecto de Vercel → **Settings → Environment Variables** añade
   Se reabre cuando quieras con *Reabrir reservas*.
 - **Añadir un evento nuevo:** copia el bloque final de `0010_eventos_agotado.sql` cambiando
   título, fecha y `evento_slug`, y añade su ficha a `EVENTOS` en `src/data.js` con el mismo slug.
+
+## Bonos y recuperaciones (pestañas del panel)
+- **Bonos:** das de alta el bono de cada persona (el nº de clases se rellena solo al
+  elegirlo del catálogo) y, cada vez que viene, le restas una con *Gastar clase hoy*.
+  Cada clase gastada queda apuntada con su fecha en *Ver clases*, donde también puedes
+  añadir una de otro día o deshacer un apunte. El bono baja solo a *Terminados* al llegar a cero.
+- **Recuperar:** apuntas a quien se queda sin su clase (por defecto *cambio de horario*)
+  con el día que pierde, y lo marcas como recuperado el día que la hace.
+- Las dos cosas van por RPC con el PIN del panel; las tablas no se leen desde el navegador.
 
 ## Notas
 - **Aforo atómico:** reservar pasa siempre por la función `book_session`, que bloquea la

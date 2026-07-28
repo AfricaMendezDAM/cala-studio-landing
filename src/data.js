@@ -113,7 +113,7 @@ export const EVENT_CARDS = [
   },
   {
     slug: "pilates-and-wine",
-    when: "Sábado 8 de agosto",
+    when: "Sábado 15 de agosto",
     name: "Pilates & Wine",
     place: "Bodega Casal Fuentes",
     desc: "Masterclass entre viñas, paseo por la bodega y una copa para brindar",
@@ -143,7 +143,7 @@ export const EVENTOS = {
       accentDeep: "#9C3020",
     },
     // Datos alineados con el cartel — nada que se contradiga
-    cuando: "Sábado 8 de agosto",
+    cuando: "Sábado 15 de agosto",
     hora: "10:30h",
     lugar: "Bodega Casal Fuentes",
     precio: "35€",
@@ -155,9 +155,9 @@ export const EVENTOS = {
     // Programa breve (lo que ya anuncia el cartel, en una línea)
     programa: "Masterclass de pilates · aperitivo con vino · paseo por las viñas",
     // CTA de reserva — abre WhatsApp con el mensaje ya escrito
-    reservaMsg: "Hola! Quiero reservar plaza para Pilates & Wine (sábado 8 de agosto)",
+    reservaMsg: "Hola! Quiero reservar plaza para Pilates & Wine (sábado 15 de agosto)",
     // Texto con el que se comparte la página (WhatsApp, Instagram, nativo)
-    compartirMsg: "Pilates & Wine · sábado 8 de agosto entre viñas\nTe vienes?",
+    compartirMsg: "Pilates & Wine · sábado 15 de agosto entre viñas\nTe vienes?",
   },
 
   "community-sessions-vol-01": {
@@ -214,6 +214,7 @@ export const BONOS = [
     label: "Flexible",
     name: "Bono",
     nameEm: "5 clases",
+    clases: 5,
     amount: 75,
     per: "/ bono",
     items: [
@@ -229,6 +230,7 @@ export const BONOS = [
     label: "Más ahorro",
     name: "Bono",
     nameEm: "10 clases",
+    clases: 10,
     amount: 140,
     per: "/ bono",
     items: [
@@ -251,6 +253,22 @@ export const PRODUCTOS = [...PRICING, ...BONOS].map((p) => ({
   concepto: `${p.name} ${p.nameEm}`,
   importe: p.amount,
 }));
+
+// Tipos de bono que ofrece el panel al dar uno de alta. Sale de BONOS, así que
+// si cambias el catálogo de tarifas no hay que tocar nada aquí.
+export const BONO_TIPOS = BONOS.map((b) => ({
+  concepto: `${b.name} ${b.nameEm}`,
+  clases: b.clases,
+}));
+
+// Por qué alguien tiene una clase pendiente de recuperar
+export const MOTIVOS_RECUPERACION = [
+  "Cambio de horario",
+  "Avisó con tiempo",
+  "Lesión o enfermedad",
+  "Clase cancelada",
+  "Otro",
+];
 
 export const CONTACT_INTERES = [
   { value: "duda",      label: "Una duda general" },

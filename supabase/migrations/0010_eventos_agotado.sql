@@ -180,8 +180,8 @@ begin
       'Pilates & Wine',
       'Masterclass entre viñas, paseo por la bodega y una copa para brindar',
       'pilates-and-wine',
-      timestamp '2026-08-08 10:30' at time zone 'Europe/Madrid',
-      timestamp '2026-08-08 13:00' at time zone 'Europe/Madrid',
+      timestamp '2026-08-15 10:30' at time zone 'Europe/Madrid',
+      timestamp '2026-08-15 13:00' at time zone 'Europe/Madrid',
       12
     );
   else
@@ -190,8 +190,8 @@ begin
       titulo      = 'Pilates & Wine',
       descripcion = 'Masterclass entre viñas, paseo por la bodega y una copa para brindar',
       evento_slug = 'pilates-and-wine',
-      starts_at   = timestamp '2026-08-08 10:30' at time zone 'Europe/Madrid',
-      ends_at     = timestamp '2026-08-08 13:00' at time zone 'Europe/Madrid'
+      starts_at   = timestamp '2026-08-15 10:30' at time zone 'Europe/Madrid',
+      ends_at     = timestamp '2026-08-15 13:00' at time zone 'Europe/Madrid'
     where id = v_id;   -- el aforo NO se toca: manda lo que haya puesto el panel
   end if;
 end $$;

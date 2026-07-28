@@ -1,17 +1,31 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "../lib/supabase.js";
-import { PRODUCTOS } from "../data.js";
+import { PRODUCTOS, BONO_TIPOS, MOTIVOS_RECUPERACION } from "../data.js";
 
 const HORA   = new Intl.DateTimeFormat("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Europe/Madrid" });
 const FECHA  = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Madrid" });
 const DAYKEY = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "Europe/Madrid" });
 const EUR    = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
+const DIA    = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "Europe/Madrid" });
 
 const METODOS = [
   { value: "efectivo",      label: "Efectivo" },
   { value: "bizum",         label: "Bizum" },
   { value: "transferencia", label: "Transferencia" },
 ];
+
+const TABS = [
+  { id: "reservas",  label: "Reservas" },
+  { id: "bonos",     label: "Bonos" },
+  { id: "recuperar", label: "Recuperar" },
+  { id: "pagos",     label: "Pagos" },
+];
+
+// Hoy en Madrid, en formato yyyy-mm-dd (el que entienden los <input type="date">)
+const hoyISO = () => DAYKEY.format(new Date());
+// Una fecha suelta (yyyy-mm-dd) se pinta sin pasar por zonas horarias: el string
+// ya es la fecha buena, así que se formatea a mediodía y no se mueve de día.
+const diaCorto = (iso) => (iso ? DIA.format(new Date(`${iso}T12:00:00`)) : "");
 
 export default function GestionPage() {
   const [pin, setPin]       = useState(() => sessionStorage.getItem("cala_admin_pin") || "");
@@ -212,16 +226,19 @@ export default function GestionPage() {
       ) : (
         <div className="gp-body">
           <div className="gp-tabs" role="tablist">
-            <button type="button" role="tab" aria-selected={tab === "reservas"}
-                    className={"gp-tab" + (tab === "reservas" ? " on" : "")}
-                    onClick={() => setTab("reservas")}>Reservas</button>
-            <button type="button" role="tab" aria-selected={tab === "pagos"}
-                    className={"gp-tab" + (tab === "pagos" ? " on" : "")}
-                    onClick={() => setTab("pagos")}>Pagos</button>
+            {TABS.map(t => (
+              <button key={t.id} type="button" role="tab" aria-selected={tab === t.id}
+                      className={"gp-tab" + (tab === t.id ? " on" : "")}
+                      onClick={() => setTab(t.id)}>{t.label}</button>
+            ))}
           </div>
 
           {tab === "pagos" ? (
             <PaymentsView pin={pin} toast={toast} />
+          ) : tab === "bonos" ? (
+            <PacksView pin={pin} toast={toast} />
+          ) : tab === "recuperar" ? (
+            <MakeupsView pin={pin} toast={toast} />
           ) : rows === null ? (
             <div className="gp-loading">Cargando…</div>
           ) : (
@@ -725,6 +742,498 @@ function PaymentForm({ mode, initial, busy, onSubmit, onCancel }) {
         {mode === "edit" && (
           <button type="button" className="gp-guest-cancel" disabled={busy} onClick={onCancel}>Cancelar</button>
         )}
+      </div>
+    </form>
+  );
+}
+
+// ── Bonos ──────────────────────────────────────────────────────────────────
+// Quién tiene bono, cuántas clases lleva gastadas y cuántas le quedan. Cada
+// clase consumida queda apuntada con su fecha, así siempre se sabe qué gasta
+// cada quien y no hay que fiarse de la memoria.
+function PacksView({ pin, toast }) {
+  const [list, setList]     = useState(null);
+  const [busy, setBusy]     = useState(false);
+  const [openId, setOpenId] = useState(null);      // bono con el detalle desplegado
+  const [uses, setUses]     = useState({});        // { [packId]: array | "loading" }
+  const [editId, setEditId] = useState(null);
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.rpc("admin_list_packs", { p_pin: pin });
+    if (error) { toast("No se pudieron cargar los bonos"); setList([]); return; }
+    setList(data ?? []);
+  }, [pin, toast]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const loadUses = useCallback(async (packId) => {
+    setUses(u => ({ ...u, [packId]: u[packId] ?? "loading" }));
+    const { data, error } = await supabase.rpc("admin_list_pack_uses", { p_pack_id: packId, p_pin: pin });
+    if (error) { toast("No se pudo cargar el detalle"); setUses(u => ({ ...u, [packId]: [] })); return; }
+    setUses(u => ({ ...u, [packId]: data ?? [] }));
+  }, [pin, toast]);
+
+  const toggle = (packId) => {
+    const next = openId === packId ? null : packId;
+    setOpenId(next);
+    if (next && uses[packId] === undefined) loadUses(packId);
+  };
+
+  const add = async (p) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_add_pack", {
+      p_nombre: p.nombre, p_telefono: p.telefono || null, p_email: p.email || null,
+      p_concepto: p.concepto, p_total: p.total, p_caduca: p.caduca || null,
+      p_nota: p.nota || null, p_pin: pin,
+    });
+    setBusy(false);
+    if (error) { toast("No se pudo dar de alta el bono"); return false; }
+    await load();
+    return true;
+  };
+
+  const update = async (id, p) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_update_pack", {
+      p_id: id, p_nombre: p.nombre, p_telefono: p.telefono || null, p_email: p.email || null,
+      p_concepto: p.concepto, p_total: p.total, p_caduca: p.caduca || null,
+      p_nota: p.nota || null, p_pin: pin,
+    });
+    setBusy(false);
+    if (error) {
+      toast(/TOTAL_MENOR/.test(error.message)
+        ? "Ya ha gastado más clases de las que pones"
+        : "No se pudo guardar");
+      return false;
+    }
+    setEditId(null);
+    await load();
+    return true;
+  };
+
+  const remove = async (id) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_remove_pack", { p_id: id, p_pin: pin });
+    setBusy(false);
+    if (error) { toast("No se pudo borrar el bono"); return; }
+    setUses(u => { const { [id]: _, ...rest } = u; return rest; });
+    await load();
+  };
+
+  // Gastar una clase del bono (hoy por defecto, o la fecha que le pongas)
+  const gastar = async (packId, fecha, nota) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_use_pack", {
+      p_pack_id: packId, p_usado_en: fecha || null, p_nota: nota || null, p_pin: pin,
+    });
+    setBusy(false);
+    if (error) {
+      toast(/BONO_AGOTADO/.test(error.message) ? "Ese bono ya no tiene clases" : "No se pudo apuntar la clase");
+      return false;
+    }
+    await load();
+    if (uses[packId] !== undefined) await loadUses(packId);
+    return true;
+  };
+
+  const removeUse = async (packId, useId) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_remove_pack_use", { p_use_id: useId, p_pin: pin });
+    setBusy(false);
+    if (error) { toast("No se pudo quitar"); return; }
+    await Promise.all([load(), loadUses(packId)]);
+  };
+
+  if (list === null) return <div className="gp-loading">Cargando…</div>;
+
+  const conClases = list.filter(p => p.restantes > 0);
+  const gastados  = list.filter(p => p.restantes <= 0);
+
+  const grupo = (title, items, empty) => (
+    <section className="gp-pay-group">
+      <header className="gp-pay-group-head">
+        <span className="gp-pay-group-title">{title}</span>
+        <span className="gp-pay-group-meta">
+          <span className="gp-pay-count">{items.length}</span>
+        </span>
+      </header>
+      {items.length === 0 ? <p className="gp-empty">{empty}</p> : (
+        <ul className="gp-bono-list">
+          {items.map(p => (
+            <PackRow key={p.id} pack={p} busy={busy}
+              editing={editId === p.id}
+              open={openId === p.id}
+              uses={uses[p.id]}
+              onEdit={() => setEditId(p.id)}
+              onCancelEdit={() => setEditId(null)}
+              onSave={(payload) => update(p.id, payload)}
+              onToggle={() => toggle(p.id)}
+              onUse={(fecha, nota) => gastar(p.id, fecha, nota)}
+              onRemoveUse={(useId) => removeUse(p.id, useId)}
+              onRemove={() => remove(p.id)} />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+
+  return (
+    <div className="gp-bonos">
+      <p className="gp-hint">Cada vez que alguien viene con bono, réstale la clase · queda apuntada con su fecha</p>
+
+      <details className="gp-pay-add">
+        <summary className="gp-pay-add-toggle">+ Dar de alta un bono</summary>
+        <PackForm mode="add" busy={busy} onSubmit={add} />
+      </details>
+
+      {grupo("Con clases por gastar", conClases, "Nadie tiene bono activo ahora mismo")}
+      {grupo("Terminados", gastados, "Todavía no se ha terminado ningún bono")}
+    </div>
+  );
+}
+
+function PackRow({ pack, busy, editing, open, uses, onEdit, onCancelEdit, onSave,
+                  onToggle, onUse, onRemoveUse, onRemove }) {
+  if (editing) {
+    return (
+      <li className="gp-bono editing">
+        <PackForm mode="edit" busy={busy} initial={pack} onSubmit={onSave} onCancel={onCancelEdit} />
+      </li>
+    );
+  }
+
+  const sinClases = pack.restantes <= 0;
+  const caducado  = !!pack.caduca && pack.caduca < hoyISO();
+  const pct = pack.total ? Math.min(100, Math.round((pack.usadas / pack.total) * 100)) : 0;
+
+  return (
+    <li className={"gp-bono" + (sinClases ? " off" : "")}>
+      <div className="gp-pay-main">
+        <span className="gp-pay-nombre">{pack.nombre}</span>
+        <span className="gp-bono-rest">
+          {sinClases ? "sin clases" : <><b>{pack.restantes}</b> por gastar</>}
+        </span>
+      </div>
+
+      <div className="gp-pay-sub">
+        <span className="gp-bono-concepto">{pack.concepto}</span>
+        <span className="gp-bono-n">{pack.usadas} de {pack.total}</span>
+        {pack.telefono && <a className="gp-pay-tel" href={`tel:${pack.telefono}`}>{pack.telefono}</a>}
+        {pack.caduca && (
+          <span className={"gp-bono-caduca" + (caducado ? " off" : "")}>
+            {caducado ? "caducó el " : "hasta el "}{diaCorto(pack.caduca)}
+          </span>
+        )}
+      </div>
+
+      <div className="gp-bono-bar" aria-hidden="true"><span style={{ width: `${pct}%` }} /></div>
+      {pack.nota && <p className="gp-pay-nota">{pack.nota}</p>}
+
+      <div className="gp-pay-actions">
+        <button type="button" className="gp-pay-mark" disabled={busy || sinClases}
+                onClick={() => onUse(null, null)}>− Gastar clase hoy</button>
+        <button type="button" className="gp-bono-det" aria-expanded={open} onClick={onToggle}>
+          {open ? "Ocultar clases" : `Ver clases (${pack.usadas})`}
+        </button>
+        <button type="button" className="gp-guest-edit-b" aria-label={`Editar el bono de ${pack.nombre}`}
+                disabled={busy} onClick={onEdit}>✎</button>
+        <button type="button" className="gp-guest-x" aria-label={`Borrar el bono de ${pack.nombre}`}
+                disabled={busy} onClick={onRemove}>✕</button>
+      </div>
+
+      {open && (
+        <PackUses list={uses} busy={busy} sinClases={sinClases}
+                  onAdd={onUse} onRemove={onRemoveUse} />
+      )}
+    </li>
+  );
+}
+
+// Las clases ya gastadas de un bono: cuándo fue cada una y, si la apuntaste,
+// cuál. Desde aquí se añade una de otro día o se deshace un apunte.
+function PackUses({ list, busy, sinClases, onAdd, onRemove }) {
+  const [fecha, setFecha] = useState(hoyISO());
+  const [nota, setNota]   = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const ok = await onAdd(fecha || null, nota.trim());
+    if (ok) { setFecha(hoyISO()); setNota(""); }
+  };
+
+  return (
+    <div className="gp-uses">
+      {list === "loading" || list === undefined ? (
+        <div className="gp-panel-load">Cargando…</div>
+      ) : list.length === 0 ? (
+        <p className="gp-empty">Aún no ha gastado ninguna clase</p>
+      ) : (
+        <ul className="gp-uses-list">
+          {list.map(u => (
+            <li key={u.id} className="gp-use">
+              <span className="gp-use-fecha">{diaCorto(u.usado_en)}</span>
+              <span className="gp-use-nota">{u.nota || "clase"}</span>
+              <button type="button" className="gp-guest-x" disabled={busy}
+                      aria-label={`Quitar la clase del ${diaCorto(u.usado_en)}`}
+                      onClick={() => onRemove(u.id)}>✕</button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <form className="gp-use-add" onSubmit={submit}>
+        <input className="gp-use-f fecha" type="date" value={fecha}
+               onChange={e => setFecha(e.target.value)} aria-label="Día de la clase" />
+        <input className="gp-use-f" placeholder="Qué clase (opcional)" value={nota}
+               autoComplete="off" onChange={e => setNota(e.target.value)} />
+        <button className="gp-add-b" disabled={busy || sinClases}>Apuntar</button>
+      </form>
+    </div>
+  );
+}
+
+function PackForm({ mode, initial, busy, onSubmit, onCancel }) {
+  const [nombre, setNombre]     = useState(initial?.nombre ?? "");
+  const [tel, setTel]           = useState(initial?.telefono ?? "");
+  const [email, setEmail]       = useState(initial?.email ?? "");
+  const [concepto, setConcepto] = useState(initial?.concepto ?? "");
+  const [total, setTotal]       = useState(initial?.total != null ? String(initial.total) : "");
+  const [caduca, setCaduca]     = useState(initial?.caduca ?? "");
+  const [nota, setNota]         = useState(initial?.nota ?? "");
+  const [libre, setLibre]       = useState(() =>
+    !!(initial?.concepto && !BONO_TIPOS.some(t => t.concepto === initial.concepto)));
+
+  // Elegir un bono del catálogo rellena el nº de clases; "Otro…" abre texto libre
+  const onTipo = (e) => {
+    const v = e.target.value;
+    if (v === "__otro__") { setLibre(true); setConcepto(""); setTotal(""); return; }
+    setLibre(false);
+    setConcepto(v);
+    const tipo = BONO_TIPOS.find(t => t.concepto === v);
+    if (tipo?.clases) setTotal(String(tipo.clases));
+  };
+
+  const n = Number(total);
+  const ready = nombre.trim() && concepto.trim() && Number.isInteger(n) && n >= 1;
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!ready) return;
+    const ok = await onSubmit({
+      nombre: nombre.trim(), telefono: tel.trim(), email: email.trim(),
+      concepto: concepto.trim(), total: n, caduca, nota: nota.trim(),
+    });
+    if (ok && mode === "add") {
+      setNombre(""); setTel(""); setEmail(""); setConcepto("");
+      setTotal(""); setCaduca(""); setNota(""); setLibre(false);
+    }
+  };
+
+  return (
+    <form className="gp-pay-form" onSubmit={submit}>
+      <input className="gp-pay-f nombre" placeholder="Nombre y apellidos" value={nombre}
+             autoComplete="off" onChange={e => setNombre(e.target.value)} />
+
+      <div className="gp-pay-prod">
+        <select className="gp-pay-f concepto" value={libre ? "__otro__" : concepto} onChange={onTipo}>
+          <option value="" disabled>Qué bono…</option>
+          {BONO_TIPOS.map(t => (
+            <option key={t.concepto} value={t.concepto}>{t.concepto}</option>
+          ))}
+          <option value="__otro__">Otro…</option>
+        </select>
+        {libre && (
+          <input className="gp-pay-f concepto-libre" placeholder="Concepto" value={concepto}
+                 autoComplete="off" onChange={e => setConcepto(e.target.value)} />
+        )}
+      </div>
+
+      <div className="gp-pay-num">
+        <label className="gp-pay-importe-field">
+          <input className="gp-pay-f importe" type="number" inputMode="numeric" min="1" max="100" step="1"
+                 placeholder="0" value={total} onChange={e => setTotal(e.target.value)} />
+          <span className="gp-pay-eur">clases</span>
+        </label>
+        <label className="gp-bono-caduca-field">
+          <span className="gp-bono-caduca-k">Caduca</span>
+          <input className="gp-pay-f" type="date" value={caduca}
+                 onChange={e => setCaduca(e.target.value)} aria-label="Fecha de caducidad" />
+        </label>
+      </div>
+
+      <input className="gp-pay-f tel" type="tel" inputMode="tel" placeholder="Teléfono (opcional)"
+             autoComplete="off" value={tel} onChange={e => setTel(e.target.value)} />
+      <input className="gp-pay-f mail" type="email" inputMode="email" placeholder="Email (opcional)"
+             autoComplete="off" value={email} onChange={e => setEmail(e.target.value)} />
+      <input className="gp-pay-f nota" placeholder="Nota (opcional)" value={nota}
+             autoComplete="off" onChange={e => setNota(e.target.value)} />
+
+      <div className="gp-pay-form-actions">
+        <button type="submit" className="gp-pay-save" disabled={busy || !ready}>
+          {mode === "add" ? "Dar de alta" : "Guardar"}
+        </button>
+        {mode === "edit" && (
+          <button type="button" className="gp-guest-cancel" disabled={busy} onClick={onCancel}>Cancelar</button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+// ── Recuperaciones ─────────────────────────────────────────────────────────
+// Quién se quedó sin su clase (casi siempre por un cambio de horario) y le debes
+// una. Se marca como recuperada el día que la hace.
+function MakeupsView({ pin, toast }) {
+  const [list, setList] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.rpc("admin_list_makeups", { p_pin: pin });
+    if (error) { toast("No se pudieron cargar las recuperaciones"); setList([]); return; }
+    setList(data ?? []);
+  }, [pin, toast]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const add = async (m) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_add_makeup", {
+      p_nombre: m.nombre, p_telefono: m.telefono || null, p_perdida_en: m.perdida_en || null,
+      p_motivo: m.motivo, p_nota: m.nota || null, p_pin: pin,
+    });
+    setBusy(false);
+    if (error) { toast("No se pudo apuntar la recuperación"); return false; }
+    await load();
+    return true;
+  };
+
+  const setEstado = async (id, estado) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_set_makeup_estado", {
+      p_id: id, p_estado: estado, p_recuperada_en: estado === "recuperada" ? hoyISO() : null, p_pin: pin,
+    });
+    setBusy(false);
+    if (error) { toast("No se pudo actualizar"); return; }
+    await load();
+  };
+
+  const remove = async (id) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_remove_makeup", { p_id: id, p_pin: pin });
+    setBusy(false);
+    if (error) { toast("No se pudo borrar"); return; }
+    await load();
+  };
+
+  if (list === null) return <div className="gp-loading">Cargando…</div>;
+
+  const pendientes  = list.filter(m => m.estado === "pendiente");
+  const recuperadas = list.filter(m => m.estado === "recuperada");
+
+  const grupo = (title, tone, items, empty) => (
+    <section className={"gp-pay-group " + tone}>
+      <header className="gp-pay-group-head">
+        <span className="gp-pay-group-title">{title}</span>
+        <span className="gp-pay-group-meta"><span className="gp-pay-count">{items.length}</span></span>
+      </header>
+      {items.length === 0 ? <p className="gp-empty">{empty}</p> : (
+        <ul className="gp-pay-list">
+          {items.map(m => (
+            <MakeupRow key={m.id} makeup={m} busy={busy}
+              onEstado={(estado) => setEstado(m.id, estado)}
+              onRemove={() => remove(m.id)} />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+
+  return (
+    <div className="gp-recuperar">
+      <p className="gp-hint">Apunta aquí a quien se queda sin su clase · le debes una</p>
+
+      <details className="gp-pay-add">
+        <summary className="gp-pay-add-toggle">+ Apuntar una recuperación</summary>
+        <MakeupForm busy={busy} onSubmit={add} />
+      </details>
+
+      {grupo("Pendientes de recuperar", "pend", pendientes, "Nadie tiene clases pendientes")}
+      {grupo("Ya recuperadas", "paid", recuperadas, "Aún no se ha recuperado ninguna")}
+    </div>
+  );
+}
+
+function MakeupRow({ makeup: m, busy, onEstado, onRemove }) {
+  const pendiente = m.estado === "pendiente";
+  return (
+    <li className="gp-pay-item">
+      <div className="gp-pay-main">
+        <span className="gp-pay-nombre">{m.nombre}</span>
+        <span className={"gp-rec-tag" + (pendiente ? "" : " ok")}>
+          {pendiente ? "Debe una clase" : `Recuperada el ${diaCorto(m.recuperada_en)}`}
+        </span>
+      </div>
+      <div className="gp-pay-sub">
+        {m.perdida_en && <span className="gp-rec-perdida">perdió la del {diaCorto(m.perdida_en)}</span>}
+        <span className="gp-pay-metodo">{m.motivo}</span>
+        {m.telefono && <a className="gp-pay-tel" href={`tel:${m.telefono}`}>{m.telefono}</a>}
+      </div>
+      {m.nota && <p className="gp-pay-nota">{m.nota}</p>}
+      <div className="gp-pay-actions">
+        <button type="button" className={"gp-pay-mark" + (pendiente ? "" : " undo")} disabled={busy}
+                onClick={() => onEstado(pendiente ? "recuperada" : "pendiente")}>
+          {pendiente ? "✓ Ya la recuperó" : "↺ Volver a pendiente"}
+        </button>
+        <button type="button" className="gp-guest-x" aria-label={`Borrar la recuperación de ${m.nombre}`}
+                disabled={busy} onClick={onRemove}>✕</button>
+      </div>
+    </li>
+  );
+}
+
+function MakeupForm({ busy, onSubmit }) {
+  const [nombre, setNombre] = useState("");
+  const [tel, setTel]       = useState("");
+  const [perdida, setPerdida] = useState(hoyISO());
+  const [motivo, setMotivo] = useState(MOTIVOS_RECUPERACION[0]);
+  const [nota, setNota]     = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!nombre.trim()) return;
+    const ok = await onSubmit({
+      nombre: nombre.trim(), telefono: tel.trim(), perdida_en: perdida,
+      motivo, nota: nota.trim(),
+    });
+    if (ok) {
+      setNombre(""); setTel(""); setPerdida(hoyISO());
+      setMotivo(MOTIVOS_RECUPERACION[0]); setNota("");
+    }
+  };
+
+  return (
+    <form className="gp-pay-form" onSubmit={submit}>
+      <input className="gp-pay-f nombre" placeholder="Nombre y apellidos" value={nombre}
+             autoComplete="off" onChange={e => setNombre(e.target.value)} />
+
+      <div className="gp-pay-num">
+        <label className="gp-bono-caduca-field">
+          <span className="gp-bono-caduca-k">Clase perdida</span>
+          <input className="gp-pay-f" type="date" value={perdida}
+                 onChange={e => setPerdida(e.target.value)} aria-label="Día de la clase perdida" />
+        </label>
+        <select className="gp-pay-f metodo" value={motivo} onChange={e => setMotivo(e.target.value)}>
+          {MOTIVOS_RECUPERACION.map(m => <option key={m} value={m}>{m}</option>)}
+        </select>
+      </div>
+
+      <input className="gp-pay-f tel" type="tel" inputMode="tel" placeholder="Teléfono (opcional)"
+             autoComplete="off" value={tel} onChange={e => setTel(e.target.value)} />
+      <input className="gp-pay-f nota" placeholder="Nota (opcional)" value={nota}
+             autoComplete="off" onChange={e => setNota(e.target.value)} />
+
+      <div className="gp-pay-form-actions">
+        <button type="submit" className="gp-pay-save" disabled={busy || !nombre.trim()}>Apuntar</button>
       </div>
     </form>
   );

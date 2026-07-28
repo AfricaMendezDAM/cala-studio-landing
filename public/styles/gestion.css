@@ -363,3 +363,86 @@
 .gp-pay-mark:hover:not(:disabled){ background: #4F7A5B; border-color: #4F7A5B; color: #fff; }
 .gp-pay-mark.undo:hover:not(:disabled){ background: var(--ink-mute); border-color: var(--ink-mute); color: #fff; }
 .gp-pay-mark:disabled{ opacity: .5; cursor: default; }
+
+/* ── Bonos ───────────────────────────────────────────────────────────── */
+.gp-bonos, .gp-recuperar{ display: flex; flex-direction: column; gap: 24px; }
+.gp-bono-list{ list-style: none; margin: 0; padding: 0; }
+.gp-bono{ padding: 14px 2px; border-bottom: 1px dashed var(--line-soft); }
+.gp-bono:last-child{ border-bottom: 0; }
+.gp-bono.off{ opacity: .62; }
+.gp-bono.editing .gp-pay-form{ padding: 0; }
+
+.gp-bono-rest{ flex: none; font-size: 12px; color: var(--ink-soft); }
+.gp-bono-rest b{ font-size: 18px; font-weight: 600; color: var(--blue); font-variant-numeric: tabular-nums; }
+.gp-bono.off .gp-bono-rest{
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute);
+}
+.gp-bono-concepto{ font-size: 12px; color: var(--ink-soft); }
+.gp-bono-n{
+  font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+  color: var(--ink-mute); background: var(--bg-2); padding: 3px 8px; border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+.gp-bono-caduca{ font-size: 11.5px; color: var(--ink-mute); }
+.gp-bono-caduca.off{ color: #B8472D; }
+
+/* Cuánto lleva gastado del bono, de un vistazo */
+.gp-bono-bar{ height: 4px; border-radius: 999px; background: var(--bg-2); margin-top: 10px; overflow: hidden; }
+.gp-bono-bar span{ display: block; height: 100%; border-radius: 999px; background: var(--blue); transition: width .25s; }
+.gp-bono.off .gp-bono-bar span{ background: var(--ink-mute); }
+
+.gp-bono-det{
+  padding: 8px 13px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--ink-soft); font-family: inherit; cursor: pointer;
+  font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+  transition: border-color .2s, color .2s;
+}
+.gp-bono-det:hover{ border-color: var(--ink); color: var(--ink); }
+
+/* Las clases ya gastadas, una a una */
+.gp-uses{ margin-top: 12px; padding: 12px 14px; background: var(--bg-2); border-radius: 12px; }
+.gp-uses-list{ list-style: none; margin: 0 0 10px; padding: 0; }
+.gp-use{ display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line-soft); }
+.gp-use:last-child{ border-bottom: 0; }
+.gp-use-fecha{
+  flex: none; min-width: 66px; font-size: 12px; font-weight: 600; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.gp-use-nota{
+  flex: 1; min-width: 0; font-size: 12.5px; color: var(--ink-soft);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.gp-use-add{ display: flex; flex-wrap: wrap; gap: 8px; }
+.gp-use-f{
+  flex: 1 1 140px; min-width: 0; padding: 9px 13px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
+  font-size: 13px; font-family: inherit; color: var(--ink);
+}
+.gp-use-f.fecha{ flex: 0 1 150px; font-variant-numeric: tabular-nums; }
+.gp-use-f:focus{ outline: none; border-color: var(--blue); }
+
+/* Campo de fecha con su etiqueta dentro (caducidad, clase perdida) */
+.gp-bono-caduca-field{
+  flex: 1 1 190px; display: flex; align-items: center; gap: 8px; padding-left: 13px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+}
+.gp-bono-caduca-k{
+  flex: none; font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  font-weight: 700; color: var(--ink-mute);
+}
+.gp-bono-caduca-field input{ flex: 1; min-width: 0; border: 0; background: transparent; padding-left: 0; }
+.gp-bono-caduca-field input:focus{ outline: none; }
+.gp-pay-form .mail{ flex: 1 1 180px; }
+
+/* ── Recuperaciones ──────────────────────────────────────────────────── */
+.gp-rec-tag{
+  flex: none; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700;
+  color: #8A6A17; background: rgba(217,182,90,.18); padding: 4px 10px; border-radius: 999px;
+}
+.gp-rec-tag.ok{ color: #4F7A5B; background: rgba(79,122,91,.12); }
+.gp-rec-perdida{ font-size: 12px; color: var(--ink-soft); }
+
+/* Con cuatro pestañas, en móvil se aprieta la tipografía para que quepan */
+@media (max-width: 520px){
+  .gp-tab{ padding: 10px 6px; font-size: 9.5px; letter-spacing: .06em; }
+}
