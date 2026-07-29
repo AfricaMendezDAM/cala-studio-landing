@@ -446,3 +446,29 @@
 @media (max-width: 520px){
   .gp-tab{ padding: 10px 6px; font-size: 9.5px; letter-spacing: .06em; }
 }
+
+/* ── Cambiar el PIN del panel ────────────────────────────────────────── */
+.gp-tools{ display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.gp-pin-open{
+  padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line);
+  background: transparent; color: var(--ink-mute); font-family: inherit; cursor: pointer;
+  font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600;
+  transition: color .2s, border-color .2s;
+}
+.gp-pin-open:hover{ color: var(--ink); border-color: var(--ink); }
+.gp-pin-change{
+  background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px 18px; margin-bottom: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.gp-pin-change-lead{ font-size: 12px; color: var(--ink-soft); }
+.gp-pin-change-row{ display: flex; flex-wrap: wrap; gap: 8px; }
+.gp-pin-change-row input{
+  flex: 1 1 150px; min-width: 0; padding: 11px 16px; letter-spacing: .16em;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
+  font-size: 15px; font-family: inherit; color: var(--ink);
+}
+.gp-pin-change-row input:focus{ outline: none; border-color: var(--blue); }
+.gp-pin-change-row .gp-b{ flex: 0 0 auto; padding: 11px 20px; }
+.gp-pin-change .gp-err{ margin-top: 0; }
+.gp-toast.ok{ background: #4F7A5B; }

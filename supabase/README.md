@@ -27,11 +27,17 @@ En el panel de Supabase → **SQL Editor** → pega y ejecuta, en orden:
 7. `migrations/0009_agosto_flow.sql`  (modalidad Flow + grupos nuevos de lunes y miércoles en agosto)
 8. `migrations/0010_eventos_agotado.sql`  (los eventos entran en el calendario y en gestión · botón de "completo" · email en la lista de espera)
 9. `migrations/0011_bonos_recuperaciones.sql`  (bonos: quién gasta qué clase y cuántas le quedan · recuperaciones pendientes · mueve Pilates & Wine al 15 de agosto)
+10. `migrations/0012_lunes_miercoles_invertidos.sql`  (lunes y miércoles pasan a Sculpt 9:00 · Flow 10:00, salvo el lunes 10 de agosto)
+11. `migrations/0013_cambiar_pin.sql`  (botón de "Cambiar PIN" dentro del panel)
 
 *Comprobación:* `select count(*) from class_sessions;` debe devolver un número > 0.
 
 > El **PIN** del panel se fija una vez (ver comentario en `0005_admin.sql`):
 > `insert into public.admin_settings (id, pin) values (1, 'TU-PIN') on conflict (id) do update set pin = excluded.pin;`
+> A partir de la 0013 se cambia desde el propio panel con el botón **Cambiar PIN**;
+> ese SQL queda solo para el caso de quedarte fuera. Vale con letras o solo con
+> números — el campo abre el teclado completo del móvil. Si lo pones numérico,
+> ponle 6 cifras o más: el PIN viaja a una API pública y uno de 4 se acierta probando.
 
 ## 3. Activar el login por email (magic link)
 **Authentication → Providers → Email**: deja activado **Email**.

@@ -37,11 +37,17 @@ export default function GestionPage() {
   const [guests, setGuests] = useState({});            // { [sessionId]: array | "loading" }
   const [waits, setWaits]   = useState({});            // lista de espera { [sessionId]: array | "loading" }
   const [tab, setTab]       = useState("reservas");    // pestaña activa: reservas | pagos
+  const [pinOpen, setPinOpen] = useState(false);       // formulario de cambio de PIN
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
   const goHome = (e) => { e.preventDefault(); window.location.hash = ""; };
 
-  const toast = useCallback((m) => { setErr(m); setTimeout(() => setErr(""), 2500); }, []);
+  // Avisos de abajo: rojos por defecto, verdes cuando algo ha salido bien
+  const [errOk, setErrOk] = useState(false);
+  const toast = useCallback((m, ok = false) => {
+    setErr(m); setErrOk(ok);
+    setTimeout(() => setErr(""), 2500);
+  }, []);
 
   const load = useCallback(async () => {
     const { data } = await supabase.from("session_availability").select("*");
@@ -80,6 +86,23 @@ export default function GestionPage() {
     const ok = await unlock(pin.trim());
     setBusy(false);
     if (!ok) setErr("PIN incorrecto");
+  };
+
+  // Cambiar el PIN. El actual va implícito: es el de esta sesión, y la función
+  // de la base lo comprueba antes de guardar nada.
+  const changePin = async (nuevo) => {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_set_pin", { p_old_pin: pin, p_new_pin: nuevo });
+    setBusy(false);
+    if (error) {
+      toast(/PIN_CORTO/.test(error.message) ? "El PIN nuevo es muy corto" : "No se pudo cambiar el PIN");
+      return false;
+    }
+    sessionStorage.setItem("cala_admin_pin", nuevo);
+    setPin(nuevo);
+    setPinOpen(false);
+    toast("PIN cambiado", true);
+    return true;
   };
 
   const toggle = (sessionId) => {
@@ -216,8 +239,10 @@ export default function GestionPage() {
         <form className="gp-pin" onSubmit={enter}>
           <span className="gp-ey">Panel privado</span>
           <p className="gp-lead">Introduce tu PIN para gestionar las reservas</p>
+          {/* Sin inputMode: el móvil abre el teclado completo, así entra
+              cualquier PIN — con letras o solo con números */}
           <div className="gp-pin-row">
-            <input type="password" inputMode="numeric" autoComplete="off" placeholder="PIN"
+            <input type="password" autoComplete="off" placeholder="PIN"
                    value={pin} onChange={e => setPin(e.target.value)} />
             <button className="gp-b" disabled={busy}>{busy ? "…" : "Entrar"}</button>
           </div>
@@ -225,6 +250,14 @@ export default function GestionPage() {
         </form>
       ) : (
         <div className="gp-body">
+          <div className="gp-tools">
+            <button type="button" className="gp-pin-open" aria-expanded={pinOpen}
+                    onClick={() => setPinOpen(o => !o)}>
+              {pinOpen ? "Dejarlo como está" : "Cambiar PIN"}
+            </button>
+          </div>
+          {pinOpen && <PinChange pin={pin} busy={busy} onDone={changePin} />}
+
           <div className="gp-tabs" role="tablist">
             {TABS.map(t => (
               <button key={t.id} type="button" role="tab" aria-selected={tab === t.id}
@@ -300,8 +333,43 @@ export default function GestionPage() {
         </div>
       )}
 
-      {err && authed && <div className="gp-toast">{err}</div>}
+      {err && authed && <div className={"gp-toast" + (errOk ? " ok" : "")}>{err}</div>}
     </main>
+  );
+}
+
+// Cambiar el PIN del panel. Pide el nuevo dos veces para no quedarse fuera por
+// una errata. Los campos no fuerzan teclado numérico: vale con letras o sin ellas.
+function PinChange({ busy, onDone }) {
+  const [nuevo, setNuevo]   = useState("");
+  const [repite, setRepite] = useState("");
+
+  const corto    = nuevo.length > 0 && nuevo.trim().length < 4;
+  const distinto = repite.length > 0 && nuevo.trim() !== repite.trim();
+  const ready    = nuevo.trim().length >= 4 && nuevo.trim() === repite.trim();
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!ready) return;
+    const ok = await onDone(nuevo.trim());
+    if (ok) { setNuevo(""); setRepite(""); }
+  };
+
+  return (
+    <form className="gp-pin-change" onSubmit={submit}>
+      <p className="gp-pin-change-lead">
+        Elige el PIN nuevo · si lo pones solo con números, en el móvil lo tecleas más rápido
+      </p>
+      <div className="gp-pin-change-row">
+        <input type="password" autoComplete="new-password" placeholder="PIN nuevo"
+               value={nuevo} onChange={e => setNuevo(e.target.value)} />
+        <input type="password" autoComplete="new-password" placeholder="Repítelo"
+               value={repite} onChange={e => setRepite(e.target.value)} />
+        <button className="gp-b" disabled={busy || !ready}>Guardar</button>
+      </div>
+      {corto    && <span className="gp-err">Ponle al menos 4 caracteres</span>}
+      {distinto && <span className="gp-err">Los dos no coinciden</span>}
+    </form>
   );
 }
 
